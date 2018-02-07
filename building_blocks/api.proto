@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package conduittest.buildingblocks;
+
+message TheRequest {
+    string requestUid = 1;
+}
+
+message TheResponse {
+    string requestUid = 1;
+    string payload = 2;
+}
+
+service TheService {
+    rpc theFunction (TheRequest) returns (TheResponse) {
+    }
+}
