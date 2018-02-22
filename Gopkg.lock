@@ -9,7 +9,16 @@
 
 [[projects]]
   name = "github.com/gogo/protobuf"
+<<<<<<< HEAD
   packages = ["jsonpb","proto","sortkeys","types"]
+=======
+  packages = [
+    "jsonpb",
+    "proto",
+    "sortkeys",
+    "types"
+  ]
+>>>>>>> ffeb4dc... Add first iteration of test for `conduit stat` (#23)
   revision = "342cbe0a04158f6dcb03ca0079991a51a4248c02"
   version = "v0.5"
 
@@ -21,7 +30,22 @@
 
 [[projects]]
   name = "github.com/golang/protobuf"
+<<<<<<< HEAD
   packages = ["proto","protoc-gen-go","protoc-gen-go/descriptor","protoc-gen-go/generator","protoc-gen-go/grpc","protoc-gen-go/plugin","ptypes","ptypes/any","ptypes/duration","ptypes/timestamp"]
+=======
+  packages = [
+    "proto",
+    "protoc-gen-go",
+    "protoc-gen-go/descriptor",
+    "protoc-gen-go/generator",
+    "protoc-gen-go/grpc",
+    "protoc-gen-go/plugin",
+    "ptypes",
+    "ptypes/any",
+    "ptypes/duration",
+    "ptypes/timestamp"
+  ]
+>>>>>>> ffeb4dc... Add first iteration of test for `conduit stat` (#23)
   revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
 
 [[projects]]
@@ -109,6 +133,18 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/streadway/quantile"
+  packages = ["."]
+  revision = "b0c588724d25ae13f5afb3d90efec0edc636432b"
+
+[[projects]]
+  name = "github.com/tsenart/vegeta"
+  packages = ["lib"]
+  revision = "9f28db162ce19bb52817af4fd9b5801b1f2772c5"
+  version = "v6.3.0"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   revision = "3d37316aaa6bd9929127ac9a527abf408178ea7b"
@@ -176,6 +212,10 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
+<<<<<<< HEAD
   inputs-digest = "f0ab2425b4e036aafc5fff8f442e5666fbd204d0e715af3f45e5766e70b5320b"
+=======
+  inputs-digest = "497169b6b675eb8d9db0e663425b80e45effe4bf28d9ae7b57141c01b5985171"
+>>>>>>> ffeb4dc... Add first iteration of test for `conduit stat` (#23)
   solver-name = "gps-cdcl"
   solver-version = 1

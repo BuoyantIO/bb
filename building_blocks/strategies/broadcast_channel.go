@@ -8,6 +8,7 @@ import (
 
 	pb "github.com/buoyantio/conduit-test/building_blocks/gen"
 	"github.com/buoyantio/conduit-test/building_blocks/service"
+	log "github.com/sirupsen/logrus"
 )
 
 const BroadcastChannelStrategyName = "broadcast-channel"
@@ -17,16 +18,16 @@ type BroadcastChannelStrategy struct {
 }
 
 func (s *BroadcastChannelStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
-	allResponsePayloads := []string{}
+	var allResponsePayloads []string
 	allErrors := []string{}
 
 	for _, client := range s.clients {
+		log.Infof("Making request to [%s]", client.GetId())
 		clientResp, err := client.Send(req)
 		if err != nil {
+			log.Infof("Received from [%s] error: %v", client.GetId(), err)
 			allErrors = append(allErrors, err.Error())
-		}
-
-		if clientResp != nil {
+		} else {
 			allResponsePayloads = append(allResponsePayloads, clientResp.Payload)
 		}
 	}
