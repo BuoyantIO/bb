@@ -3,29 +3,11 @@ package service
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	pb "github.com/buoyantio/conduit-test/building_blocks/gen"
 )
-
-type clientMock struct {
-	errorToReturn    error
-	idToReturn       string
-	responseToReturn *pb.TheResponse
-	closeWasCalled   bool
-}
-
-func (c *clientMock) Close() error {
-	c.closeWasCalled = true
-	return c.errorToReturn
-}
-
-func (c *clientMock) GetId() string {
-	return c.idToReturn
-}
-func (c *clientMock) Send(*pb.TheRequest) (*pb.TheResponse, error) {
-	return c.responseToReturn, c.errorToReturn
-}
 
 func TestRequestHandler(t *testing.T) {
 	t.Run("delegates to underlying strategy", func(t *testing.T) {
@@ -124,10 +106,85 @@ func TestRequestHandler(t *testing.T) {
 	})
 }
 
-func TestServiceClose(t *testing.T) {
+func TestFireAndForgetClient(t *testing.T) {
+	t.Run("calls underlying client and returns stub response", func(t *testing.T) {
+		barrier := make(chan bool)
+		expectedResponseToClose := errors.New("error to return on close")
+		expectedResponseToGetId := "some id goes here"
+
+		underlyingClient := &MockClient{
+			IdToReturn:       expectedResponseToGetId,
+			ErrorToReturn:    expectedResponseToClose,
+			ResponseToReturn: &pb.TheResponse{Payload: "this will be ignored anyway"},
+			RequestInterceptor: func(req *pb.TheRequest) {
+				barrier <- true
+			},
+		}
+
+		fnfClient := fireAndForgetClient{
+			underlyingClient: underlyingClient,
+		}
+
+		actualResponseToGetId := fnfClient.GetId()
+		if actualResponseToGetId != expectedResponseToGetId {
+			t.Fatalf("Expected call to getId() to be delegated and return [%s], but got [%s]", expectedResponseToGetId, actualResponseToGetId)
+		}
+
+		actualResponseToClose := fnfClient.Close()
+		if actualResponseToClose != expectedResponseToClose {
+			t.Fatalf("Expecting call to Close() to return [%v], but got [%v]", expectedResponseToClose, actualResponseToClose)
+		}
+
+		request := &pb.TheRequest{
+			RequestUid: "some request uid goes here",
+		}
+
+		response, err := fnfClient.Send(request)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", expectedResponseToClose)
+		}
+
+		if !strings.Contains(response.Payload, "fire-and-forget") && !strings.Contains(response.Payload, request.RequestUid) {
+			t.Fatalf("Expected response's payload to contain the fire-and-forget stub message, got [%v]", response)
+		}
+
+		<-barrier
+		actualRequestReceived := underlyingClient.RequestReceived
+		if actualRequestReceived != request {
+			t.Fatalf("Expected fire and forget client to eventually delegate request to client, but got [%v]", actualRequestReceived)
+		}
+	})
+
+	t.Run("ignores errors from calling underlying client and returns stub response", func(t *testing.T) {
+
+		underlyingClient := &MockClient{
+			ErrorToReturn: errors.New("this error will be ignored"),
+		}
+
+		fnfClient := fireAndForgetClient{
+			underlyingClient: underlyingClient,
+		}
+
+		request := &pb.TheRequest{
+			RequestUid: "some request uid goes here",
+		}
+
+		response, err := fnfClient.Send(request)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", errors.New("error to return on close"))
+		}
+
+		if !strings.Contains(response.Payload, "fire-and-forget") && !strings.Contains(response.Payload, request.RequestUid) {
+			t.Fatalf("Expected response's payload to contain the fire-and-forget stub message, got [%v]", response)
+		}
+
+	})
+}
+
+func TestService(t *testing.T) {
 	t.Run("it closes all underlying clients", func(t *testing.T) {
-		client1 := &clientMock{}
-		client2 := &clientMock{}
+		client1 := &MockClient{}
+		client2 := &MockClient{}
 		expectedClients := []Client{client1, client2}
 
 		svc := Service{
@@ -139,17 +196,17 @@ func TestServiceClose(t *testing.T) {
 			t.Fatalf("Unexpected error: %v", err)
 		}
 
-		if !client1.closeWasCalled || !client2.closeWasCalled {
+		if !client1.CloseWasCalled || !client2.CloseWasCalled {
 			t.Fatalf("expecting close to be called for both [%v] and [%v]", client1, client2)
 		}
 	})
 
 	t.Run("close returns error if any client returns error when closing", func(t *testing.T) {
 		someError := errors.New("expected")
-		client1 := &clientMock{
-			errorToReturn: someError,
+		client1 := &MockClient{
+			ErrorToReturn: someError,
 		}
-		client2 := &clientMock{}
+		client2 := &MockClient{}
 		expectedClients := []Client{client1, client2}
 
 		svc := Service{
@@ -161,7 +218,7 @@ func TestServiceClose(t *testing.T) {
 			t.Fatalf("Expecting error, got nothing")
 		}
 
-		if !client1.closeWasCalled || !client2.closeWasCalled {
+		if !client1.CloseWasCalled || !client2.CloseWasCalled {
 			t.Fatalf("expecting close to be called for both [%v] and [%v]", client1, client2)
 		}
 	})

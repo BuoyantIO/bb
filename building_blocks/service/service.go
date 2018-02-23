@@ -18,6 +18,7 @@ type Config struct {
 	H1DownstreamServers      []string
 	PercentageFailedRequests int
 	SleepInMillis            int
+	FireAndForget            bool
 	ExtraArguments           map[string]string
 }
 
@@ -25,6 +26,31 @@ type Client interface {
 	Close() error
 	GetId() string
 	Send(*pb.TheRequest) (*pb.TheResponse, error)
+}
+
+type fireAndForgetClient struct {
+	underlyingClient Client
+}
+
+func (f *fireAndForgetClient) Close() error { return f.underlyingClient.Close() }
+
+func (f *fireAndForgetClient) GetId() string { return f.underlyingClient.GetId() }
+
+func (f *fireAndForgetClient) Send(req *pb.TheRequest) (*pb.TheResponse, error) {
+	go func(c Client, req *pb.TheRequest) {
+		log.Infof("Sending fire-and-forget request to [%s] for request uid [%s]", f.GetId(), req.RequestUid)
+		response, err := c.Send(req)
+		log.Infof("Response from fire-and-forget request to [%s] for request uid [%s] was: %s error %v", f.GetId(), req.RequestUid, response, err)
+	}(f.underlyingClient, req)
+
+	stubResponse := &pb.TheResponse{
+		Payload: fmt.Sprintf("Stub response for fire-and-forget request to [%s] for request uid [%s]", f.GetId(), req.RequestUid),
+	}
+	return stubResponse, nil
+}
+
+func MakeFireAndForget(client Client) Client {
+	return &fireAndForgetClient{underlyingClient: client}
 }
 
 type Server interface {

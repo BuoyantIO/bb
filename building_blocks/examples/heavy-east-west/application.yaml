@@ -1,0 +1,448 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: heavy-east-west-lab
+
+## Layer: Api Gateway
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: heavy-east-west-lab
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: http-to-grpc
+        image: gcr.io/runconduit/bb:v1
+        args: ["broadcast-channel", "--h1-server-port", "80",
+        "--h1-downstream-server", "http://heavy-east-west-lab-t1-n1-svc:80",
+        "--h1-downstream-server", "http://heavy-east-west-lab-t1-n2-svc:80",
+        "--h1-downstream-server", "http://heavy-east-west-lab-t1-n3-svc:80",
+        "--h1-downstream-server", "http://heavy-east-west-lab-t1-n4-svc:80",
+        "--h1-downstream-server", "http://heavy-east-west-lab-t1-n5-svc:80",
+        "--fire-and-forget"]
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway-svc
+  namespace: heavy-east-west-lab
+spec:
+  type: LoadBalancer
+  selector:
+    app: api-gateway
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+
+## Layer: First row of broadcasters
+### t1-n1
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: heavy-east-west-lab-t1-n1
+  namespace: heavy-east-west-lab
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: heavy-east-west-lab-t1-n1
+  template:
+    metadata:
+      labels:
+        app: heavy-east-west-lab-t1-n1
+    spec:
+      containers:
+      - name: http-to-grpc
+        image: gcr.io/runconduit/bb:v1
+        args: ["broadcast-channel", "--h1-server-port", "80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n1-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n2-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n3-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n4-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n5-svc:80",
+        "--fire-and-forget"]
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: heavy-east-west-lab-t1-n1-svc
+  namespace: heavy-east-west-lab
+spec:
+  selector:
+    app: heavy-east-west-lab-t1-n1
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+### t1-n2
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: heavy-east-west-lab-t1-n2
+  namespace: heavy-east-west-lab
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: heavy-east-west-lab-t1-n2
+  template:
+    metadata:
+      labels:
+        app: heavy-east-west-lab-t1-n2
+    spec:
+      containers:
+      - name: http-to-grpc
+        image: gcr.io/runconduit/bb:v1
+        args: ["broadcast-channel", "--h1-server-port", "80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n1-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n2-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n3-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n4-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n5-svc:80",
+        "--fire-and-forget"]
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: heavy-east-west-lab-t1-n2-svc
+  namespace: heavy-east-west-lab
+spec:
+  selector:
+    app: heavy-east-west-lab-t1-n2
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+### t1-n3
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: heavy-east-west-lab-t1-n3
+  namespace: heavy-east-west-lab
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: heavy-east-west-lab-t1-n3
+  template:
+    metadata:
+      labels:
+        app: heavy-east-west-lab-t1-n3
+    spec:
+      containers:
+      - name: http-to-grpc
+        image: gcr.io/runconduit/bb:v1
+        args: ["broadcast-channel", "--h1-server-port", "80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n1-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n2-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n3-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n4-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n5-svc:80",
+        "--fire-and-forget"]
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: heavy-east-west-lab-t1-n3-svc
+  namespace: heavy-east-west-lab
+spec:
+  selector:
+    app: heavy-east-west-lab-t1-n3
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+### t1-n4
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: heavy-east-west-lab-t1-n4
+  namespace: heavy-east-west-lab
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: heavy-east-west-lab-t1-n4
+  template:
+    metadata:
+      labels:
+        app: heavy-east-west-lab-t1-n4
+    spec:
+      containers:
+      - name: http-to-grpc
+        image: gcr.io/runconduit/bb:v1
+        args: ["broadcast-channel", "--h1-server-port", "80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n1-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n2-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n3-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n4-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n5-svc:80",
+        "--fire-and-forget"]
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: heavy-east-west-lab-t1-n4-svc
+  namespace: heavy-east-west-lab
+spec:
+  selector:
+    app: heavy-east-west-lab-t1-n4
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+### t1-n5
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: heavy-east-west-lab-t1-n5
+  namespace: heavy-east-west-lab
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: heavy-east-west-lab-t1-n5
+  template:
+    metadata:
+      labels:
+        app: heavy-east-west-lab-t1-n5
+    spec:
+      containers:
+      - name: http-to-grpc
+        image: gcr.io/runconduit/bb:v1
+        args: ["broadcast-channel", "--h1-server-port", "80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n1-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n2-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n3-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n4-svc:80",
+        "--grpc-downstream-server", "heavy-east-west-lab-t2-n5-svc:80",
+        "--fire-and-forget"]
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: heavy-east-west-lab-t1-n5-svc
+  namespace: heavy-east-west-lab
+spec:
+  selector:
+    app: heavy-east-west-lab-t1-n5
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+
+## Layer: End layer of termini
+### t2-n1
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: heavy-east-west-lab-t2-n1
+  namespace: heavy-east-west-lab
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: heavy-east-west-lab-t2-n1
+  template:
+    metadata:
+      labels:
+        app: heavy-east-west-lab-t2-n1
+    spec:
+      containers:
+      - name: http-to-grpc
+        image: gcr.io/runconduit/bb:v1
+        args: ["terminus", "--grpc-server-port", "80", "--response-text", "t2-n1",
+        "--fire-and-forget"]
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: heavy-east-west-lab-t2-n1-svc
+  namespace: heavy-east-west-lab
+spec:
+  selector:
+    app: heavy-east-west-lab-t2-n1
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+### t2-n2
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: heavy-east-west-lab-t2-n2
+  namespace: heavy-east-west-lab
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: heavy-east-west-lab-t2-n2
+  template:
+    metadata:
+      labels:
+        app: heavy-east-west-lab-t2-n2
+    spec:
+      containers:
+      - name: http-to-grpc
+        image: gcr.io/runconduit/bb:v1
+        args: ["terminus", "--grpc-server-port", "80", "--response-text", "t2-n2",
+        "--fire-and-forget"]
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: heavy-east-west-lab-t2-n2-svc
+  namespace: heavy-east-west-lab
+spec:
+  selector:
+    app: heavy-east-west-lab-t2-n2
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+### t2-n3
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: heavy-east-west-lab-t2-n3
+  namespace: heavy-east-west-lab
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: heavy-east-west-lab-t2-n3
+  template:
+    metadata:
+      labels:
+        app: heavy-east-west-lab-t2-n3
+    spec:
+      containers:
+      - name: http-to-grpc
+        image: gcr.io/runconduit/bb:v1
+        args: ["terminus", "--grpc-server-port", "80", "--response-text", "t2-n3",
+        "--fire-and-forget"]
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: heavy-east-west-lab-t2-n3-svc
+  namespace: heavy-east-west-lab
+spec:
+  selector:
+    app: heavy-east-west-lab-t2-n3
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+### t2-n4
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: heavy-east-west-lab-t2-n4
+  namespace: heavy-east-west-lab
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: heavy-east-west-lab-t2-n4
+  template:
+    metadata:
+      labels:
+        app: heavy-east-west-lab-t2-n4
+    spec:
+      containers:
+      - name: http-to-grpc
+        image: gcr.io/runconduit/bb:v1
+        args: ["terminus", "--grpc-server-port", "80", "--response-text", "t2-n4",
+        "--fire-and-forget"]
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: heavy-east-west-lab-t2-n4-svc
+  namespace: heavy-east-west-lab
+spec:
+  selector:
+    app: heavy-east-west-lab-t2-n4
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+### t2-n5
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: heavy-east-west-lab-t2-n5
+  namespace: heavy-east-west-lab
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: heavy-east-west-lab-t2-n5
+  template:
+    metadata:
+      labels:
+        app: heavy-east-west-lab-t2-n5
+    spec:
+      containers:
+      - name: http-to-grpc
+        image: gcr.io/runconduit/bb:v1
+        args: ["terminus", "--grpc-server-port", "80", "--response-text", "t2-n5",
+        "--fire-and-forget"]
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: heavy-east-west-lab-t2-n5-svc
+  namespace: heavy-east-west-lab
+spec:
+  selector:
+    app: heavy-east-west-lab-t2-n5
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80

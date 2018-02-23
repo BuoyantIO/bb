@@ -47,7 +47,8 @@ func init() {
 	RootCmd.PersistentFlags().IntVar(&config.H1ServerPort, "h1-server-port", -1, "port to bind a HTTP 1.1 server to")
 	RootCmd.PersistentFlags().IntVar(&config.PercentageFailedRequests, "percent-failure", 0, "percentage of requests that this service will automatically fail")
 	RootCmd.PersistentFlags().IntVar(&config.SleepInMillis, "sleep-in-millis", 0, "amount of milliseconds to wait before actually start processing as request")
+	RootCmd.PersistentFlags().BoolVar(&config.FireAndForget, "fire-and-forget", false, "do not wait for a response when contacting downstream services.")
 	RootCmd.PersistentFlags().StringSliceVar(&config.GrpcDownstreamServers, "grpc-downstream-server", []string{}, "list of servers (hostname:port) to send messages to using gRPC, can be repeated")
-	RootCmd.PersistentFlags().StringSliceVar(&config.H1DownstreamServers, "h1-downstream-servers", []string{}, "list of servers (hostname:port) to send messages to using HTTP 1.1, can be repeated")
+	RootCmd.PersistentFlags().StringSliceVar(&config.H1DownstreamServers, "h1-downstream-server", []string{}, "list of servers (hostname:port) to send messages to using HTTP 1.1, can be repeated")
 	RootCmd.PersistentFlags().StringVar(&logLevel, "log-level", log.DebugLevel.String(), "log level, must be one of: panic, fatal, error, warn, info, debug")
 }

@@ -7,18 +7,26 @@ import (
 )
 
 type MockClient struct {
-	IdToReturn       string
-	ResponseToReturn *pb.TheResponse
-	ErrorToReturn    error
-	RequestReceived  *pb.TheRequest
+	IdToReturn         string
+	ResponseToReturn   *pb.TheResponse
+	ErrorToReturn      error
+	RequestReceived    *pb.TheRequest
+	RequestInterceptor func(req *pb.TheRequest)
+	CloseWasCalled     bool
 }
 
-func (m *MockClient) Close() error { return m.ErrorToReturn }
+func (m *MockClient) Close() error {
+	m.CloseWasCalled = true
+	return m.ErrorToReturn
+}
 
 func (m *MockClient) GetId() string { return m.IdToReturn }
 
 func (m *MockClient) Send(req *pb.TheRequest) (*pb.TheResponse, error) {
 	m.RequestReceived = req
+	if m.RequestInterceptor != nil {
+		m.RequestInterceptor(req)
+	}
 	return m.ResponseToReturn, m.ErrorToReturn
 }
 

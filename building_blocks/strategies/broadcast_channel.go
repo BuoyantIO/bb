@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 
 	pb "github.com/buoyantio/conduit-test/building_blocks/gen"
 	"github.com/buoyantio/conduit-test/building_blocks/service"
@@ -18,25 +19,45 @@ type BroadcastChannelStrategy struct {
 }
 
 func (s *BroadcastChannelStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
-	var allResponsePayloads []string
-	allErrors := []string{}
+	numberOfRequestsToMake := len(s.clients)
+	log.Infof("Starting broadcast to [%d] downstream services", numberOfRequestsToMake)
+	var wg sync.WaitGroup
+	wg.Add(numberOfRequestsToMake)
 
+	allResults := make(chan interface{}, numberOfRequestsToMake)
 	for _, client := range s.clients {
-		log.Infof("Making request to [%s]", client.GetId())
-		clientResp, err := client.Send(req)
-		if err != nil {
-			log.Infof("Received from [%s] error: %v", client.GetId(), err)
-			allErrors = append(allErrors, err.Error())
+		go func(c service.Client) {
+			log.Infof("Making request to [%s]", c.GetId())
+			defer wg.Done()
+			clientResp, err := c.Send(req)
+			if err != nil {
+				log.Infof("Received from [%s] error: %v", c.GetId(), err)
+				allResults <- err
+				log.Errorf("Error when broadcasting request [%v] to client [%s]: %v", req, c.GetId(), err)
+			} else {
+				allResults <- clientResp
+			}
+		}(client)
+	}
+	wg.Wait()
+	close(allResults)
+	log.Info("Finished broadcast")
+
+	allErrorMessages := make([]string, 0)
+	allResponsePayloads := make([]string, 0)
+	for result := range allResults {
+		if err, isErr := result.(error); isErr {
+			allErrorMessages = append(allErrorMessages, err.Error())
 		} else {
-			allResponsePayloads = append(allResponsePayloads, clientResp.Payload)
+			resp := result.(*pb.TheResponse)
+			allResponsePayloads = append(allResponsePayloads, resp.Payload)
 		}
 	}
 
 	var aggregatedResp *pb.TheResponse
 	var aggregatedErrors error
-
-	if len(allErrors) > 0 {
-		aggregatedErrors = errors.New(strings.Join(allErrors, ","))
+	if len(allErrorMessages) > 0 {
+		aggregatedErrors = errors.New(strings.Join(allErrorMessages, ","))
 	} else {
 		aggregatedResp = &pb.TheResponse{
 			Payload: strings.Join(allResponsePayloads, ","),

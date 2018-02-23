@@ -12,13 +12,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func NewService(config *service.Config, strategyName string) (*service.Service, error) {
+func buildServers(config *service.Config, handler *service.RequestHandler) ([]service.Server, error) {
 	servers := make([]service.Server, 0)
-
-	handler := &service.RequestHandler{
-		Config: config,
-	}
-
 	grpcServer, err := protocols.NewGrpcServerIfConfigured(config, handler)
 	if err != nil {
 		return nil, err
@@ -37,6 +32,10 @@ func NewService(config *service.Config, strategyName string) (*service.Service, 
 		servers = append(servers, httpServer)
 	}
 
+	return servers, nil
+}
+
+func buildClients(config *service.Config) ([]service.Client, error) {
 	clients := make([]service.Client, 0)
 	grpcClients, err := protocols.NewGrpcClientsIfConfigured(config)
 	if err != nil {
@@ -49,6 +48,33 @@ func NewService(config *service.Config, strategyName string) (*service.Service, 
 		return nil, err
 	}
 	clients = append(clients, httpClients...)
+
+	if config.FireAndForget {
+		wrappedClients := make([]service.Client, 0)
+		for _, c := range clients {
+			wrappedClients = append(wrappedClients, service.MakeFireAndForget(c))
+		}
+		clients = wrappedClients
+	}
+
+	return clients, err
+}
+
+func NewService(config *service.Config, strategyName string) (*service.Service, error) {
+
+	handler := &service.RequestHandler{
+		Config: config,
+	}
+
+	servers, err := buildServers(config, handler)
+	if err != nil {
+		return nil, err
+	}
+
+	clients, err := buildClients(config)
+	if err != nil {
+		return nil, err
+	}
 
 	strategy, err := NewStrategyByName(strategyName, config, servers, clients)
 	if err != nil {
