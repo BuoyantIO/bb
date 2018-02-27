@@ -105,6 +105,7 @@ var strategyByName = map[string]strategyConstructor{
 	strategies.PointToPointStrategyName:     strategies.NewPointToPointChannel,
 	strategies.BroadcastChannelStrategyName: strategies.NewBroadcastChannel,
 	strategies.TerminusStrategyName:         strategies.NewTerminusStrategy,
+	strategies.HttpEgressStrategyName:       strategies.NewHttpEgress,
 }
 
 func NewStrategyByName(strategyName string, config *service.Config, servers []service.Server, clients []service.Client) (service.Strategy, error) {

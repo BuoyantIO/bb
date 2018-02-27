@@ -8,10 +8,9 @@ import (
 
 var responseText string
 
-// terminusCmd represents the terminus command
 var terminusCmd = &cobra.Command{
-	Use:   "terminus",
-	Short: "Receives the request and returns a response",
+	Use:   strategies.TerminusStrategyName,
+	Short: "Receives the request and returns a pre-defined response",
 	Run: func(cmd *cobra.Command, args []string) {
 		config.ExtraArguments[strategies.TerminusResponseTextArgName] = responseText
 		svc, err := NewService(config, strategies.TerminusStrategyName)

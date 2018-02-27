@@ -30,7 +30,7 @@ func (s *TerminusStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheRes
 
 func NewTerminusStrategy(config *service.Config, servers []service.Server, clients []service.Client) (service.Strategy, error) {
 	if len(clients) != 0 || len(servers) == 0 {
-		return nil, fmt.Errorf("strategy [%s] requires at least one server port and exactly zero downstream services, but was configured as: %+v", PointToPointStrategyName, config)
+		return nil, fmt.Errorf("strategy [%s] requires at least one server port and exactly zero downstream services, but was configured as: %+v", TerminusStrategyName, config)
 	}
 
 	return &TerminusStrategy{config: config}, nil
