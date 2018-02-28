@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
 
 	pb "github.com/buoyantio/conduit-test/building_blocks/gen"
@@ -11,6 +12,22 @@ import (
 )
 
 func TestHttpEgressStrategy(t *testing.T) {
+	t.Run("Rejects malformed or incomplete URLs", func(t *testing.T) {
+		malformedUrls := []string{"ftp://httpbin.org", "httpbin.org", "httpbin.org:80", "", "123"}
+
+		for _, urlToInvoke := range malformedUrls {
+			httpConfig := &service.Config{
+				ExtraArguments: map[string]string{
+					HttpEgressUrlToInvokeArgName: urlToInvoke,
+				},
+			}
+			_, err := NewHttpEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
+			if err == nil {
+				t.Fatalf("Expecting error, got nothing when configuring url [%s]", urlToInvoke)
+			}
+
+		}
+	})
 
 	t.Run("Calls external service using both HTTP and HTTPS", func(t *testing.T) {
 		protocols := []string{"http", "https"}
@@ -20,7 +37,8 @@ func TestHttpEgressStrategy(t *testing.T) {
 			urlToInvoke := fmt.Sprintf("%s://%s/anything", protocolToTest, expectedHost)
 			httpConfig := &service.Config{
 				ExtraArguments: map[string]string{
-					HttpEgressUrlToInvokeArgName: urlToInvoke,
+					HttpEgressHttpMethodToUseArgName: "GET",
+					HttpEgressUrlToInvokeArgName:     urlToInvoke,
 				},
 			}
 			egress, err := NewHttpEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
@@ -53,7 +71,49 @@ func TestHttpEgressStrategy(t *testing.T) {
 
 			actualHostHeader := headers["Host"]
 			if actualHostHeader != expectedHost {
-				t.Fatalf("Expected Hist header to be [%s], but got [%s]", expectedMethod, actualHostHeader)
+				t.Fatalf("Expected Host header to be [%s], but got [%s]", expectedHost, actualHostHeader)
+			}
+		}
+	})
+
+	t.Run("Can call external service using any HTTP method", func(t *testing.T) {
+		methods := []string{"GET", "POST", "PATCH", "PUT", "DELETE"}
+
+		for _, methodToTest := range methods {
+			expectedHost := "httpbin.org"
+			urlToInvoke := fmt.Sprintf("https://httpbin.org/%s", strings.ToLower(methodToTest))
+
+			httpConfig := &service.Config{
+				ExtraArguments: map[string]string{
+					HttpEgressUrlToInvokeArgName:     urlToInvoke,
+					HttpEgressHttpMethodToUseArgName: methodToTest,
+				},
+			}
+			egress, err := NewHttpEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			request := &pb.TheRequest{}
+			response, err := egress.Do(context.Background(), request)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			var jsonPayload map[string]interface{}
+			json.Unmarshal([]byte(response.Payload), &jsonPayload)
+
+			expectedUrl := urlToInvoke
+			actualUrl := jsonPayload["url"]
+			if actualUrl != expectedUrl {
+				t.Fatalf("Expected HTTP method to be [%s], but got [%s]", expectedUrl, actualUrl)
+			}
+
+			headers := jsonPayload["headers"].(map[string]interface{})
+
+			actualHostHeader := headers["Host"]
+			if actualHostHeader != expectedHost {
+				t.Fatalf("Expected Hist header to be [%s], but got [%s]", expectedHost, actualHostHeader)
 			}
 		}
 	})
@@ -67,7 +127,8 @@ func TestHttpEgressStrategy(t *testing.T) {
 			urlToInvoke := fmt.Sprintf("https://httpbin.org/status/%d", statusToReturn)
 			httpConfig := &service.Config{
 				ExtraArguments: map[string]string{
-					HttpEgressUrlToInvokeArgName: urlToInvoke,
+					HttpEgressHttpMethodToUseArgName: "GET",
+					HttpEgressUrlToInvokeArgName:     urlToInvoke,
 				},
 			}
 			egress, err := NewHttpEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
