@@ -106,7 +106,7 @@ everything is ok:
           --fire-and-forget                      do not wait for a response when contacting downstream services.
           --grpc-downstream-server stringSlice   list of servers (hostname:port) to send messages to using gRPC, can be repeated
           --grpc-server-port int                 port to bind a gRPC server to (default -1)
-          --h1-downstream-server stringSlice     list of servers (hostname:port) to send messages to using HTTP 1.1, can be repeated
+          --h1-downstream-server stringSlice     list of servers (protocol://hostname:port) to send messages to using HTTP 1.1, can be repeated
           --h1-server-port int                   port to bind a HTTP 1.1 server to (default -1)
       -h, --help                                 help for bb
           --id string                            identifier for this container
@@ -208,4 +208,3 @@ You can then use `curl`to query the service:
 
     $ curl `minikube -n bb-readme service bb-readme-gateway-svc  --url`
     {"requestUid":"in:http-sid:point-to-point-channel-grpc:-1-h1:8080-66349706","payload":"BANANA"}
-
