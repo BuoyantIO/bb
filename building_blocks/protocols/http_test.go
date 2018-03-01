@@ -15,7 +15,7 @@ import (
 )
 
 func TestTheHttpServer(t *testing.T) {
-	t.Run("treats an empty request as the first request in the service call chain", func(t *testing.T) {
+	t.Run("adds request uid when request doesnt have one", func(t *testing.T) {
 		expectedProtoResponse := &pb.TheResponse{}
 
 		strategy := &stubStrategy{
@@ -49,9 +49,13 @@ func TestTheHttpServer(t *testing.T) {
 		if expectedProtoResponse.Payload != actualProtoResponse.Payload {
 			t.Fatalf("Expected HTTP response to contain protobuf [%v] but it was [%v]", expectedProtoResponse, actualProtoResponse)
 		}
+
+		if actualProtoResponse.RequestUid == "" {
+			t.Fatalf("Expected HTTP response to contain a new request uid assigned to protobuf, but was nil")
+		}
 	})
 
-	t.Run("returns whatever the strategy returned", func(t *testing.T) {
+	t.Run("serializes the response returned by the strategy", func(t *testing.T) {
 		expectedProtoResponse := &pb.TheResponse{
 			Payload: "something",
 		}
@@ -94,7 +98,6 @@ func TestTheHttpServer(t *testing.T) {
 			t.Fatalf("Unexpected error: %v", err)
 		}
 
-		fmt.Println(string(bytesResp))
 		var actualProtoResponse pb.TheResponse
 		jsonpb.UnmarshalString(string(bytesResp), &actualProtoResponse)
 
@@ -110,7 +113,7 @@ func TestTheHttpServer(t *testing.T) {
 		theServer := httptest.NewServer(handler)
 		defer theServer.Close()
 
-		req := "something that isnt valid"
+		req := "this error was injected by [terminus-grpc:-1-h1:9090]"
 
 		resp, err := http.Post(theServer.URL, "application/json", strings.NewReader(req))
 		if err != nil {
@@ -128,7 +131,7 @@ func TestTheHttpServer(t *testing.T) {
 	})
 
 	t.Run("returns a 500 if strategy returned error", func(t *testing.T) {
-		expectedError := errors.New("expected ")
+		expectedError := errors.New("expected")
 
 		strategy := &stubStrategy{
 			theErrorToReturn: expectedError,
@@ -161,6 +164,15 @@ func TestTheHttpServer(t *testing.T) {
 		if resp.StatusCode != expectedHttpStatus {
 			t.Fatalf("Expecting response to have status [%d] but was: %v", expectedHttpStatus, resp)
 		}
+
+		defer resp.Body.Close()
+		bytesResp, err := ioutil.ReadAll(resp.Body)
+		stringResp := string(bytesResp)
+
+		expectedInBody := expectedError.Error()
+		if !strings.Contains(stringResp, expectedInBody) {
+			t.Fatalf("Expecting response body to contain the error message [%s], but got [%s]", expectedInBody, stringResp)
+		}
 	})
 }
 
@@ -183,8 +195,9 @@ func TestHttpClient(t *testing.T) {
 		defer theServer.Close()
 
 		client := httpClient{
-			id:        t.Name(),
-			serverUrl: theServer.URL,
+			id:                        t.Name(),
+			serverUrl:                 theServer.URL,
+			clientForDownsteamServers: http.DefaultClient,
 		}
 
 		actualProtoResponse, err := client.Send(expectedProtoRequest)
@@ -208,7 +221,7 @@ func TestHttpClient(t *testing.T) {
 		}
 
 		strategy := &stubStrategy{
-			theErrorToReturn: errors.New("expected"),
+			theErrorToReturn: errors.New("this error was injected by [terminus-grpc:-1-h1:9090]"),
 		}
 
 		handler := newHttpHandler(&service.RequestHandler{Config: &service.Config{}, Strategy: strategy})
@@ -216,8 +229,9 @@ func TestHttpClient(t *testing.T) {
 		defer theServer.Close()
 
 		client := httpClient{
-			id:        t.Name(),
-			serverUrl: theServer.URL,
+			id:                        t.Name(),
+			serverUrl:                 theServer.URL,
+			clientForDownsteamServers: http.DefaultClient,
 		}
 
 		_, err := client.Send(expectedProtoRequest)
@@ -228,6 +242,34 @@ func TestHttpClient(t *testing.T) {
 		actualProtoRequest := strategy.theRequestReceived
 		if expectedProtoRequest.RequestUid != actualProtoRequest.RequestUid {
 			t.Fatalf("Expected HTTP request to contain protobuf [%v] but it was [%v]", expectedProtoRequest, actualProtoRequest)
+		}
+	})
+
+	t.Run("returns error when server returned something that isn't the expected protobuf in json", func(t *testing.T) {
+		expectedProtoRequest := &pb.TheRequest{
+			RequestUid: "123",
+		}
+
+		expectedPayload := "this error was injected by [terminus-grpc:-1-h1:9090]"
+
+		theServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprint(w, expectedPayload)
+		}))
+		defer theServer.Close()
+
+		client := httpClient{
+			id:                        t.Name(),
+			serverUrl:                 theServer.URL,
+			clientForDownsteamServers: http.DefaultClient,
+		}
+
+		_, err := client.Send(expectedProtoRequest)
+		if err == nil {
+			t.Fatalf("Expecting error, got nothing")
+		}
+
+		if expectedPayload != err.Error() {
+			t.Fatalf("Expecting error text to e [%s], but received [%s]", expectedPayload, err.Error())
 		}
 	})
 }

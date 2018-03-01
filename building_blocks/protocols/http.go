@@ -1,8 +1,10 @@
 package protocols
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -39,15 +41,16 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 		protoReq = r
 	} else {
+		newRequestUid := newRequestUid("http", h.serviceHandler.Config)
+		log.Infof("Received request with empty body, assigning new request uid [%s] to it", newRequestUid)
 		protoReq = pb.TheRequest{
-			RequestUid: newRequestUid("http", h.serviceHandler.Config),
+			RequestUid: newRequestUid,
 		}
-		log.Info("Received request with empty body, creating new request")
 	}
 
 	protoResponse, err := h.serviceHandler.Handle(req.Context(), &protoReq)
 	if err != nil {
-		dealWithErrorDuringHandling(w, fmt.Errorf("error in handler: %v", err))
+		dealWithErrorDuringHandling(w, fmt.Errorf("error handling http request: %v", err))
 		return
 	}
 
@@ -60,8 +63,9 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 type httpClient struct {
-	id        string
-	serverUrl string
+	id                        string
+	serverUrl                 string
+	clientForDownsteamServers *http.Client
 }
 
 func (c *httpClient) Close() error { return nil }
@@ -73,12 +77,16 @@ func (c *httpClient) Send(req *pb.TheRequest) (*pb.TheResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := http.Post(c.serverUrl, "application/json", strings.NewReader(json))
+
+	resp, err := c.clientForDownsteamServers.Post(c.serverUrl, "application/json", strings.NewReader(json))
 	if err != nil {
 		return nil, err
 	}
+
 	var protoResp pb.TheResponse
+	defer resp.Body.Close()
 	err = unmarshalJsonToProtobuf(resp.Body, &protoResp)
+
 	return &protoResp, err
 }
 
@@ -114,7 +122,18 @@ func unmarshalProtoRequest(httpReq *http.Request) (pb.TheRequest, error) {
 }
 
 func unmarshalJsonToProtobuf(r io.Reader, out proto.Message) error {
-	return jsonpb.Unmarshal(r, out)
+	bytes, err := ioutil.ReadAll(r)
+	if err != nil {
+		return err
+	}
+
+	bodyAsString := string(bytes)
+	err = jsonpb.UnmarshalString(bodyAsString, out)
+	if err != nil {
+		return errors.New(bodyAsString)
+	}
+
+	return nil
 }
 
 func dealWithErrorDuringHandling(w http.ResponseWriter, err error) {
@@ -146,10 +165,16 @@ func NewHttpServerIfConfigured(config *service.Config, serviceHandler *service.R
 
 func NewHttpClientsIfConfigured(config *service.Config) ([]service.Client, error) {
 	clients := make([]service.Client, 0)
+
+	httpClientToUse := &http.Client{
+		Timeout: config.DownstreamConnectionTimeout,
+	}
+
 	for _, serverUrl := range config.H1DownstreamServers {
 		clients = append(clients, &httpClient{
-			id:        serverUrl,
-			serverUrl: serverUrl,
+			id:                        serverUrl,
+			serverUrl:                 serverUrl,
+			clientForDownsteamServers: httpClientToUse,
 		})
 	}
 

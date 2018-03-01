@@ -31,9 +31,8 @@ func (s *BroadcastChannelStrategy) Do(_ context.Context, req *pb.TheRequest) (*p
 			defer wg.Done()
 			clientResp, err := c.Send(req)
 			if err != nil {
-				log.Infof("Received from [%s] error: %v", c.GetId(), err)
-				allResults <- err
 				log.Errorf("Error when broadcasting request [%v] to client [%s]: %v", req, c.GetId(), err)
+				allResults <- fmt.Errorf("downstream server [%s] returned error: %v", c.GetId(), err)
 			} else {
 				allResults <- clientResp
 			}

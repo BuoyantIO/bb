@@ -11,15 +11,16 @@ import (
 )
 
 type Config struct {
-	Id                       string
-	GrpcServerPort           int
-	H1ServerPort             int
-	GrpcDownstreamServers    []string
-	H1DownstreamServers      []string
-	PercentageFailedRequests int
-	SleepInMillis            int
-	FireAndForget            bool
-	ExtraArguments           map[string]string
+	Id                          string
+	GrpcServerPort              int
+	H1ServerPort                int
+	GrpcDownstreamServers       []string
+	H1DownstreamServers         []string
+	PercentageFailedRequests    int
+	SleepInMillis               int
+	FireAndForget               bool
+	DownstreamConnectionTimeout time.Duration
+	ExtraArguments              map[string]string
 }
 
 type Client interface {

@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/buoyantio/conduit-test/building_blocks/service"
 	log "github.com/sirupsen/logrus"
@@ -50,5 +51,6 @@ func init() {
 	RootCmd.PersistentFlags().BoolVar(&config.FireAndForget, "fire-and-forget", false, "do not wait for a response when contacting downstream services.")
 	RootCmd.PersistentFlags().StringSliceVar(&config.GrpcDownstreamServers, "grpc-downstream-server", []string{}, "list of servers (hostname:port) to send messages to using gRPC, can be repeated")
 	RootCmd.PersistentFlags().StringSliceVar(&config.H1DownstreamServers, "h1-downstream-server", []string{}, "list of servers (protocol://hostname:port) to send messages to using HTTP 1.1, can be repeated")
+	RootCmd.PersistentFlags().DurationVar(&config.DownstreamConnectionTimeout, "downstream-timeout", time.Minute*1, "timeout to use when making downstream connections.")
 	RootCmd.PersistentFlags().StringVar(&logLevel, "log-level", log.DebugLevel.String(), "log level, must be one of: panic, fatal, error, warn, info, debug")
 }
