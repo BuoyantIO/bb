@@ -39,6 +39,7 @@ func TestHttpEgressStrategy(t *testing.T) {
 				ExtraArguments: map[string]string{
 					HttpEgressHttpMethodToUseArgName: "GET",
 					HttpEgressUrlToInvokeArgName:     urlToInvoke,
+					HttpEgressHttpTimeoutArgName:     "10s",
 				},
 			}
 			egress, err := NewHttpEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
@@ -87,6 +88,7 @@ func TestHttpEgressStrategy(t *testing.T) {
 				ExtraArguments: map[string]string{
 					HttpEgressUrlToInvokeArgName:     urlToInvoke,
 					HttpEgressHttpMethodToUseArgName: methodToTest,
+					HttpEgressHttpTimeoutArgName:     "10s",
 				},
 			}
 			egress, err := NewHttpEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
@@ -129,6 +131,7 @@ func TestHttpEgressStrategy(t *testing.T) {
 				ExtraArguments: map[string]string{
 					HttpEgressHttpMethodToUseArgName: "GET",
 					HttpEgressUrlToInvokeArgName:     urlToInvoke,
+					HttpEgressHttpTimeoutArgName:     "10s",
 				},
 			}
 			egress, err := NewHttpEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})

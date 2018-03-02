@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"time"
 
 	pb "github.com/buoyantio/conduit-test/building_blocks/gen"
 	"github.com/buoyantio/conduit-test/building_blocks/service"
@@ -18,24 +19,26 @@ const (
 	HttpEgressStrategyName           = "http-egress"
 	HttpEgressUrlToInvokeArgName     = "url"
 	HttpEgressHttpMethodToUseArgName = "method"
+	HttpEgressHttpTimeoutArgName     = "http-client-timeout"
 )
 
 var validHttpMethods = map[string]bool{"GET": true, "POST": true, "PUT": true, "DELETE": true, "PATCH": true}
 
 type HttpEgressStrategy struct {
-	urlToInvoke string
-	methodToUse string
+	httpClientToUse *http.Client
+	urlToInvoke     string
+	methodToUse     string
 }
 
 func (s *HttpEgressStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
 
-	log.Infof("Making [%s] request to [%s] for requestUid [%s]", s.methodToUse, s.urlToInvoke, req.GetRequestUid())
 	httpRequest, err := http.NewRequest(s.methodToUse, s.urlToInvoke, strings.NewReader(req.RequestUid))
 	if err != nil {
 		return nil, err
 	}
 
-	httpResp, err := http.DefaultClient.Do(httpRequest)
+	log.Infof("Making [%s] request to [%s] for requestUid [%s]", s.methodToUse, s.urlToInvoke, req.GetRequestUid())
+	httpResp, err := s.httpClientToUse.Do(httpRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -85,8 +88,19 @@ func NewHttpEgress(config *service.Config, servers []service.Server, clients []s
 		return nil, fmt.Errorf("HTTP method [%s] isn't supported [%v]", httpMethodToUse, validHttpMethods)
 	}
 
+	timeout, err := time.ParseDuration(config.ExtraArguments[HttpEgressHttpTimeoutArgName])
+	if err != nil {
+		return nil, fmt.Errorf("error while parsing timeout [%s]: %v", config.ExtraArguments[HttpEgressHttpTimeoutArgName], err)
+	}
+
+	httpClient := &http.Client{
+		Timeout: timeout,
+	}
+	log.Infof("HTTP client being used is: %+v", httpClient)
+
 	return &HttpEgressStrategy{
-		urlToInvoke: urlToInvoke,
-		methodToUse: httpMethodToUse,
+		urlToInvoke:     urlToInvoke,
+		methodToUse:     httpMethodToUse,
+		httpClientToUse: httpClient,
 	}, nil
 }
