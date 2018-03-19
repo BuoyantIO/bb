@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/buoyantio/conduit-test/service"
+	"github.com/buoyantio/bb/service"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -19,7 +19,7 @@ var logLevel string
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "bb",
-	Short: "Various microservices that can be used to build a test lab for Conduit",
+	Short: "Building Blocks or `bb` is a tool that can simulate many of the typical scenarios of a cloud-native Service-Oriented Architecture based on microservices.",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// set global log level
 		level, err := log.ParseLevel(logLevel)

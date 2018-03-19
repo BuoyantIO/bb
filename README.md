@@ -4,7 +4,7 @@ Building Blocks or `bb` is a tool that can simulate many of the typical scenario
 of a cloud-native Service-Oriented Architecture based on microservices.
 
 ## Using `bb`
-`bb` publishes a single container, `gcr.io/runconduit/bb:v1`. Instances of this 
+`bb` publishes a single container, `gcr.io/buoyantio/bb:v1`. Instances of this 
 container receive and return a simple message, described by the protobuf schema 
 [in this repository](api.proto). This known interface allows for `bb` 
 containers to be arranged in many different ways, just like building a structure 
@@ -68,9 +68,9 @@ for images:
 
 You should then build a Docker image for `bb`:
 
-    $  bin/docker-build-building-blocks.sh
+    $  bin/docker-build-bb.sh
     Sending build context to Docker daemon  136.7MB
-    Step 1/6 : FROM gcr.io/runconduit/base:2017-10-30.01
+    Step 1/6 : FROM gcr.io/buoyantio/base:2017-10-30.01
      ---> 14aa74f25501
     Step 2/6 : RUN apt-get update
      ---> Running in c3b174baabea
@@ -134,12 +134,13 @@ You should then build a Docker image for `bb`:
      ---> e6d76c5df612
     Removing intermediate container f4f571b01dd8
     Successfully built e6d76c5df612
-    Successfully tagged gcr.io/runconduit/bb:v1
+    Successfully tagged gcr.io/buoyantio/bb:v1
 
 A test run using the Docker CLI should return usage information and confirm everything is ok:
 
-     $ docker run gcr.io/runconduit/bb:v1
-    Various microservices that can be used to build a test lab for Conduit
+     $ docker run gcr.io/buoyantio/bb:v1
+    Building Blocks or `bb` is a tool that can simulate many of the typical scenarios of a cloud-native Service-Oriented Architecture based on microservices.
+
     
     Usage:
       bb [command]
@@ -193,7 +194,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: gcr.io/runconduit/bb:v1
+        image: gcr.io/buoyantio/bb:v1
         args: ["terminus", "--grpc-server-port", "9090", "--response-text", "BANANA"]
         ports:
         - containerPort: 9090
@@ -228,7 +229,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: gcr.io/runconduit/bb:v1
+        image: gcr.io/buoyantio/bb:v1
         args: ["point-to-point-channel", "--grpc-downstream-server", "bb-readme-terminus-svc:9090", "--h1-server-port", "8080"]
         ports:
         - containerPort: 8080

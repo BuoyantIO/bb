@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	pb "github.com/buoyantio/conduit-test/gen"
+	pb "github.com/buoyantio/bb/gen"
 )
 
 func TestRequestHandler(t *testing.T) {

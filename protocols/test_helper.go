@@ -3,7 +3,7 @@ package protocols
 import (
 	"context"
 
-	pb "github.com/buoyantio/conduit-test/gen"
+	pb "github.com/buoyantio/bb/gen"
 )
 
 type stubStrategy struct {

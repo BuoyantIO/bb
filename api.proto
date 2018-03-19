@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package conduittest.buildingblocks;
+package buoyantio.bb;
 
 message TheRequest {
     string requestUid = 1;

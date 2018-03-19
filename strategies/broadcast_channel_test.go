@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	pb "github.com/buoyantio/conduit-test/gen"
-	"github.com/buoyantio/conduit-test/service"
+	pb "github.com/buoyantio/bb/gen"
+	"github.com/buoyantio/bb/service"
 )
 
 func TestScatherGatherChannelStrategy(t *testing.T) {

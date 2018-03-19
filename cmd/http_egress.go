@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/buoyantio/conduit-test/strategies"
+	"github.com/buoyantio/bb/strategies"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

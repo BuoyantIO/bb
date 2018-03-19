@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/buoyantio/conduit-test/cmd"
+	"github.com/buoyantio/bb/cmd"
 )
 
 func main() {
