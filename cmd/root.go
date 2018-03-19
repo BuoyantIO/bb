@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/buoyantio/conduit-test/building_blocks/service"
+	"github.com/buoyantio/conduit-test/service"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

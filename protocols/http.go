@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	pb "github.com/buoyantio/conduit-test/building_blocks/gen"
-	"github.com/buoyantio/conduit-test/building_blocks/service"
+	pb "github.com/buoyantio/conduit-test/gen"
+	"github.com/buoyantio/conduit-test/service"
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"

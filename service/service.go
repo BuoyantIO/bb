@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"time"
 
-	pb "github.com/buoyantio/conduit-test/building_blocks/gen"
+	pb "github.com/buoyantio/conduit-test/gen"
 	log "github.com/sirupsen/logrus"
 )
 

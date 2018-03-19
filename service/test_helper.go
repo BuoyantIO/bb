@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	pb "github.com/buoyantio/conduit-test/building_blocks/gen"
+	pb "github.com/buoyantio/conduit-test/gen"
 )
 
 type MockClient struct {

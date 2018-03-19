@@ -6,9 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/buoyantio/conduit-test/building_blocks/protocols"
-	"github.com/buoyantio/conduit-test/building_blocks/service"
-	"github.com/buoyantio/conduit-test/building_blocks/strategies"
+	"github.com/buoyantio/conduit-test/protocols"
+	"github.com/buoyantio/conduit-test/service"
+	"github.com/buoyantio/conduit-test/strategies"
 	log "github.com/sirupsen/logrus"
 )
 

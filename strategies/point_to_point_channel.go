@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	pb "github.com/buoyantio/conduit-test/building_blocks/gen"
-	"github.com/buoyantio/conduit-test/building_blocks/service"
+	pb "github.com/buoyantio/conduit-test/gen"
+	"github.com/buoyantio/conduit-test/service"
 )
 
 const PointToPointStrategyName = "point-to-point-channel"

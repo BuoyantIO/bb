@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/buoyantio/conduit-test/building_blocks/cmd"
+	"github.com/buoyantio/conduit-test/cmd"
 )
 
 func main() {

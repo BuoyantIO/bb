@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	pb "github.com/buoyantio/conduit-test/building_blocks/gen"
-	"github.com/buoyantio/conduit-test/building_blocks/service"
+	pb "github.com/buoyantio/conduit-test/gen"
+	"github.com/buoyantio/conduit-test/service"
 	log "github.com/sirupsen/logrus"
 )
 
