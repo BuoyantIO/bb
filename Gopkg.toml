@@ -1,10 +1,6 @@
 required = ["github.com/golang/protobuf/protoc-gen-go"]
 
 [[constraint]]
-  name = "github.com/runconduit/conduit"
-  revision = "3856b38550adf2144943ea4063b06ee138c4bd37" # TODO: switch to tag?
-
-[[constraint]]
   name = "github.com/sirupsen/logrus"
   version = "v1.0.3"
 
@@ -13,13 +9,5 @@ required = ["github.com/golang/protobuf/protoc-gen-go"]
   revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845" # protobuf has no release tags at time of writing
 
 [[constraint]]
-  branch = "master"
-  name = "golang.org/x/net"
-
-[[constraint]]
   name = "google.golang.org/grpc"
   version = "1.8.0"
-
-[[constraint]]
-  name = "github.com/tsenart/vegeta"
-  version = "6.3.0"
