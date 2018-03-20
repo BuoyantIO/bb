@@ -7,8 +7,9 @@ import (
 )
 
 var pointToPointChannelCmd = &cobra.Command{
-	Use:   strategies.PointToPointStrategyName,
-	Short: "Forwards the request to one and only one downstream service.",
+	Use:     strategies.PointToPointStrategyName,
+	Short:   "Forwards the request to one and only one downstream service.",
+	Example: "bb point-to-point-channel --grpc-downstream-server localhost:9090 --h1-server-port 8080",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		svc, err := NewService(config, strategies.PointToPointStrategyName)

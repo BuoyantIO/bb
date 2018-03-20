@@ -11,8 +11,9 @@ var methodToUse string
 var clientTimeout string
 
 var httpEgressCmd = &cobra.Command{
-	Use:   strategies.HttpEgressStrategyName,
-	Short: "Receives a request, makes a HTTP(S) call to a specified URL and return the body of the response",
+	Use:     strategies.HttpEgressStrategyName,
+	Short:   "Receives a request, makes a HTTP(S) call to a specified URL and return the body of the response",
+	Example: "bb http-egress --h1-server-port 8080 --method GET --url http://httpbin.org/anything",
 	Run: func(cmd *cobra.Command, args []string) {
 		config.ExtraArguments[strategies.HttpEgressUrlToInvokeArgName] = urlToInvoke
 		config.ExtraArguments[strategies.HttpEgressHttpMethodToUseArgName] = methodToUse
