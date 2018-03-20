@@ -4,7 +4,7 @@ Building Blocks or `bb` is a tool that can simulate many of the typical scenario
 of a cloud-native Service-Oriented Architecture based on microservices.
 
 ## Using `bb`
-`bb` publishes a single container, `buoyantio/bb:v1`. Instances of this 
+`bb` publishes a single container, `buoyantio/bb:v0.0.1`. Instances of this 
 container receive and return a simple message, described by the protobuf schema 
 [in this repository](api.proto). This known interface allows for `bb` 
 containers to be arranged in many different ways, just like building a structure 
@@ -134,11 +134,11 @@ You should then build a Docker image for `bb`:
      ---> e6d76c5df612
     Removing intermediate container f4f571b01dd8
     Successfully built e6d76c5df612
-    Successfully tagged buoyantio/bb:v1
+    Successfully tagged buoyantio/bb:v0.0.1
 
 A test run using the Docker CLI should return usage information and confirm everything is ok:
 
-     $ docker run buoyantio/bb:v1
+     $ docker run buoyantio/bb:v0.0.1
     Building Blocks or `bb` is a tool that can simulate many of the typical scenarios of a cloud-native Service-Oriented Architecture based on microservices.
 
     
@@ -194,7 +194,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v1
+        image: buoyantio/bb:v0.0.1
         args: ["terminus", "--grpc-server-port", "9090", "--response-text", "BANANA"]
         ports:
         - containerPort: 9090
@@ -229,7 +229,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v1
+        image: buoyantio/bb:v0.0.1
         args: ["point-to-point-channel", "--grpc-downstream-server", "bb-readme-terminus-svc:9090", "--h1-server-port", "8080"]
         ports:
         - containerPort: 8080
