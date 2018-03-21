@@ -73,70 +73,12 @@ You should then build a Docker image for `bb`:
     Step 1/6 : FROM buoyantio/base:2017-10-30.01
      ---> 14aa74f25501
     Step 2/6 : RUN apt-get update
-     ---> Running in c3b174baabea
-    Get:1 http://security.debian.org jessie/updates InRelease [63.1 kB]
-    Ign http://deb.debian.org jessie InRelease
-    Get:2 http://deb.debian.org jessie-updates InRelease [145 kB]
-    Get:3 http://deb.debian.org jessie Release.gpg [2434 B]
-    Get:4 http://deb.debian.org jessie Release [148 kB]
-    Get:5 http://security.debian.org jessie/updates/main amd64 Packages [640 kB]
-    Get:6 http://deb.debian.org jessie-updates/main amd64 Packages [23.1 kB]
-    Get:7 http://deb.debian.org jessie/main amd64 Packages [9064 kB]
-    Fetched 10.1 MB in 1min 33s (107 kB/s)
-    Reading package lists...
-     ---> 52a8e6b98213
-    Removing intermediate container c3b174baabea
-    Step 3/6 : RUN apt-get install -y ca-certificates
-     ---> Running in d0c086411dcb
-    Reading package lists...
-    Building dependency tree...
-    Reading state information...
-    The following extra packages will be installed:
-      openssl
-    The following NEW packages will be installed:
-      ca-certificates openssl
-    0 upgraded, 2 newly installed, 0 to remove and 7 not upgraded.
-    Need to get 872 kB of archives.
-    After this operation, 1495 kB of additional disk space will be used.
-    Get:1 http://deb.debian.org/debian/ jessie/main openssl amd64 1.0.1t-1+deb8u7 [665 kB]
-    Get:2 http://deb.debian.org/debian/ jessie/main ca-certificates all 20141019+deb8u3 [207 kB]
-    debconf: delaying package configuration, since apt-utils is not installed
-    Fetched 872 kB in 2s (399 kB/s)
-    Selecting previously unselected package openssl.
-    (Reading database ... 7934 files and directories currently installed.)
-    Preparing to unpack .../openssl_1.0.1t-1+deb8u7_amd64.deb ...
-    Unpacking openssl (1.0.1t-1+deb8u7) ...
-    Selecting previously unselected package ca-certificates.
-    Preparing to unpack .../ca-certificates_20141019+deb8u3_all.deb ...
-    Unpacking ca-certificates (20141019+deb8u3) ...
-    Setting up openssl (1.0.1t-1+deb8u7) ...
-    Setting up ca-certificates (20141019+deb8u3) ...
-    debconf: unable to initialize frontend: Dialog
-    debconf: (TERM is not set, so the dialog frontend is not usable.)
-    debconf: falling back to frontend: Readline
-    debconf: unable to initialize frontend: Readline
-    debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC contains: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.20.2 /usr/local/share/perl/5.20.2 /usr/lib/x86_64-linux-gnu/perl5/5.20 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl/5.20 /usr/share/perl/5.20 /usr/local/lib/site_perl .) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 7.)
-    debconf: falling back to frontend: Teletype
-    Updating certificates in /etc/ssl/certs... 174 added, 0 removed; done.
-    Processing triggers for ca-certificates (20141019+deb8u3) ...
-    Updating certificates in /etc/ssl/certs... 0 added, 0 removed; done.
-    Running hooks in /etc/ca-certificates/update.d....done.
-     ---> ac2e44a7a879
-    Removing intermediate container d0c086411dcb
-    Step 4/6 : RUN mkdir /app
-     ---> Running in ca3caf62eb9e
-     ---> 73a3a5e1fb09
-    Removing intermediate container ca3caf62eb9e
-    Step 5/6 : ADD target/bb /app/
-     ---> 55e2defdcf60
-    Step 6/6 : ENTRYPOINT /app/bb
-     ---> Running in f4f571b01dd8
-     ---> e6d76c5df612
+    [...]
     Removing intermediate container f4f571b01dd8
     Successfully built e6d76c5df612
     Successfully tagged buoyantio/bb:v0.0.1
 
-A test run using the Docker CLI should return usage information and confirm everything is ok:
+A test run using the Docker CLI should return usage information and confirm that everything is ok:
 
      $ docker run buoyantio/bb:v0.0.1
     Building Blocks or `bb` is a tool that can simulate many of the typical scenarios of a cloud-native Service-Oriented Architecture based on microservices.
@@ -167,92 +109,11 @@ A test run using the Docker CLI should return usage information and confirm ever
     
     Use "bb [command] --help" for more information about a command.
 
-To build the exact same scenario we had above, but for Kubernetes, you should have a YAML 
-configuration like the following:
+To build the exact same scenario we had above, but for Kubernetes, you can deploy the should have 
+a YAML configuration like the one in our [examples directory](). You can deploy it to your Kubernetes 
+cluster by running:
 
-```yaml
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: bb-readme
----
-apiVersion: apps/v1beta1
-kind: Deployment
-metadata:
-  name: bb-readme-terminus
-  namespace: bb-readme
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: bb-readme-terminus
-  template:
-    metadata:
-      labels:
-        app: bb-readme-terminus
-    spec:
-      containers:
-      - name: http-to-grpc
-        image: buoyantio/bb:v0.0.1
-        args: ["terminus", "--grpc-server-port", "9090", "--response-text", "BANANA"]
-        ports:
-        - containerPort: 9090
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: bb-readme-terminus-svc
-  namespace: bb-readme
-spec:
-  selector:
-    app: bb-readme-terminus
-  ports:
-  - name: grpc
-    port: 9090
-    targetPort: 9090
----
-apiVersion: apps/v1beta1
-kind: Deployment
-metadata:
-  name: bb-readme-gateway
-  namespace: bb-readme
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: bb-readme-gateway
-  template:
-    metadata:
-      labels:
-        app: bb-readme-gateway
-    spec:
-      containers:
-      - name: http-to-grpc
-        image: buoyantio/bb:v0.0.1
-        args: ["point-to-point-channel", "--grpc-downstream-server", "bb-readme-terminus-svc:9090", "--h1-server-port", "8080"]
-        ports:
-        - containerPort: 8080
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: bb-readme-gateway-svc
-  namespace: bb-readme
-spec:
-  selector:
-    app: bb-readme-gateway
-  type: LoadBalancer
-  ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-```
-
-If you copy and paste the YAML content above in a file called `application.yaml`, you can 
-then deploy it to your Kubernetes cluster by running:
-
-    $ kubectl apply -f application.yaml
+    $ kubectl apply -f examples/bb-readme/application.yaml
 
 You can then use `curl`to query the service:
 
