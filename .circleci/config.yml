@@ -7,5 +7,4 @@ jobs:
     steps:
     - checkout
     - run: bin/dep ensure -vendor-only
-    - run: go vet -tests -all ./...
-    - run: go test -race -v ./...
+    - run: bin/precheck.sh
