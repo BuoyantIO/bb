@@ -1,0 +1,11 @@
+version: 2
+jobs:
+  build:
+    docker:
+    - image: circleci/golang:1.10
+    working_directory: /go/src/github.com/buoyantio/bb
+    steps:
+    - checkout
+    - run: bin/dep ensure -vendor-only
+    - run: go vet -tests -all ./...
+    - run: go test -race -v ./...
