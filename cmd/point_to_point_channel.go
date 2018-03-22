@@ -12,7 +12,7 @@ var pointToPointChannelCmd = &cobra.Command{
 	Example: "bb point-to-point-channel --grpc-downstream-server localhost:9090 --h1-server-port 8080",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		svc, err := NewService(config, strategies.PointToPointStrategyName)
+		svc, err := newService(config, strategies.PointToPointStrategyName)
 		if err != nil {
 			log.Fatalln(err)
 		}

@@ -167,6 +167,10 @@ func TestTheHttpServer(t *testing.T) {
 
 		defer resp.Body.Close()
 		bytesResp, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+
 		stringResp := string(bytesResp)
 
 		expectedInBody := expectedError.Error()

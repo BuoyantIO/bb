@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Config holds the ,ain configuration for this service.
 type Config struct {
 	Id                          string
 	GrpcServerPort              int
@@ -23,6 +24,7 @@ type Config struct {
 	ExtraArguments              map[string]string
 }
 
+// Client is an abstraction representing a client connection to each downstream service.
 type Client interface {
 	Close() error
 	GetId() string
@@ -50,37 +52,42 @@ func (f *fireAndForgetClient) Send(req *pb.TheRequest) (*pb.TheResponse, error) 
 	return stubResponse, nil
 }
 
+// MakeFireAndForget creates a new Client that will send requests and not wait for a response.
 func MakeFireAndForget(client Client) Client {
 	return &fireAndForgetClient{underlyingClient: client}
 }
 
+// Server is an abstraction representing each server made available to receive inbound connections.
 type Server interface {
 	GetId() string
 }
 
+// Strategy is the algorithm applied by this service when it receives requests (c.f. http://wiki.c2.com/?StrategyPattern)
 type Strategy interface {
 	Do(context.Context, *pb.TheRequest) (*pb.TheResponse, error)
 }
 
+// RequestHandler is a protocol-independent request/response handler interface
 type RequestHandler struct {
 	Config   *Config
 	Strategy Strategy
 }
 
+// Handle takes in a request, processes it accordingly to its Strategy, an returns the response.
 func (h *RequestHandler) Handle(ctx context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
 	sleepForConfiguredTime(h)
 
 	if shouldFailThisRequest(h) {
 		return nil, fmt.Errorf("this error was injected by [%s]", h.Config.Id)
-	} else {
-		reqId := req.RequestUid
-
-		resp, err := h.Strategy.Do(ctx, req)
-		if resp != nil {
-			resp.RequestUid = reqId
-		}
-		return resp, err
 	}
+
+	reqId := req.RequestUid
+
+	resp, err := h.Strategy.Do(ctx, req)
+	if resp != nil {
+		resp.RequestUid = reqId
+	}
+	return resp, err
 }
 
 func sleepForConfiguredTime(h *RequestHandler) {
@@ -93,12 +100,14 @@ func shouldFailThisRequest(h *RequestHandler) bool {
 	return rnd < perc
 }
 
+// Service is the aggregate of all Client, Server, and the Strategy.
 type Service struct {
 	Servers  []Server
 	Clients  []Client
 	Strategy Strategy
 }
 
+// Close closes any open connections with Clients.
 func (s *Service) Close() error {
 	errors := make([]error, 0)
 	for _, c := range s.Clients {

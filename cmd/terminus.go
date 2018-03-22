@@ -14,7 +14,7 @@ var terminusCmd = &cobra.Command{
 	Example: "bb terminus --grpc-server-port 9090 --response-text BANANA",
 	Run: func(cmd *cobra.Command, args []string) {
 		config.ExtraArguments[strategies.TerminusResponseTextArgName] = responseText
-		svc, err := NewService(config, strategies.TerminusStrategyName)
+		svc, err := newService(config, strategies.TerminusStrategyName)
 
 		if err != nil {
 			log.Fatalln(err)

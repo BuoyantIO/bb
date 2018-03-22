@@ -12,7 +12,7 @@ var broadcastChannelCmd = &cobra.Command{
 	Example: "bb broadcast-channel --h1-downstream-server http://localhost:9090 --grpc-downstream-server localhost:9091 --h1-server-port 9092",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		svc, err := NewService(config, strategies.BroadcastChannelStrategyName)
+		svc, err := newService(config, strategies.BroadcastChannelStrategyName)
 		if err != nil {
 			log.Fatalln(err)
 		}

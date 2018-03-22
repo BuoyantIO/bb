@@ -147,6 +147,7 @@ func newHttpHandler(serviceHandler *service.RequestHandler) *httpHandler {
 	}
 }
 
+// NewHttpServerIfConfigured returns a HTTP-backed Server
 func NewHttpServerIfConfigured(config *service.Config, serviceHandler *service.RequestHandler) (service.Server, error) {
 	if config.H1ServerPort == -1 {
 		return nil, nil
@@ -163,6 +164,8 @@ func NewHttpServerIfConfigured(config *service.Config, serviceHandler *service.R
 	}, nil
 }
 
+// NewHttpClientsIfConfigured takes in a Config and returns an instance of HTTP-backed Client for every configured HTTP
+// downstream service
 func NewHttpClientsIfConfigured(config *service.Config) ([]service.Client, error) {
 	clients := make([]service.Client, 0)
 

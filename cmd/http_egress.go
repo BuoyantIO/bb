@@ -18,7 +18,7 @@ var httpEgressCmd = &cobra.Command{
 		config.ExtraArguments[strategies.HttpEgressUrlToInvokeArgName] = urlToInvoke
 		config.ExtraArguments[strategies.HttpEgressHttpMethodToUseArgName] = methodToUse
 		config.ExtraArguments[strategies.HttpEgressHttpTimeoutArgName] = clientTimeout
-		svc, err := NewService(config, strategies.HttpEgressStrategyName)
+		svc, err := newService(config, strategies.HttpEgressStrategyName)
 
 		if err != nil {
 			log.Fatalln(err)

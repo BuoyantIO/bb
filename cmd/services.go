@@ -60,7 +60,7 @@ func buildClients(config *service.Config) ([]service.Client, error) {
 	return clients, err
 }
 
-func NewService(config *service.Config, strategyName string) (*service.Service, error) {
+func newService(config *service.Config, strategyName string) (*service.Service, error) {
 
 	handler := &service.RequestHandler{
 		Config: config,
@@ -76,7 +76,7 @@ func NewService(config *service.Config, strategyName string) (*service.Service, 
 		return nil, err
 	}
 
-	strategy, err := NewStrategyByName(strategyName, config, servers, clients)
+	strategy, err := newStrategyByName(strategyName, config, servers, clients)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -108,7 +108,7 @@ var strategyByName = map[string]strategyConstructor{
 	strategies.HttpEgressStrategyName:       strategies.NewHttpEgress,
 }
 
-func NewStrategyByName(strategyName string, config *service.Config, servers []service.Server, clients []service.Client) (service.Strategy, error) {
+func newStrategyByName(strategyName string, config *service.Config, servers []service.Server, clients []service.Client) (service.Strategy, error) {
 	strategyConstructor := strategyByName[strategyName]
 	if strategyConstructor == nil {
 		return nil, fmt.Errorf("no strategy named [%s]", strategyName)

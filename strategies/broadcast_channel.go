@@ -12,12 +12,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// BroadcastChannelStrategyName is the user-friendly name of this strategy
 const BroadcastChannelStrategyName = "broadcast-channel"
 
+// BroadcastChannelStrategy is a strategy that will take in a request and broadact it to all downstream services.
 type BroadcastChannelStrategy struct {
 	clients []service.Client
 }
 
+// Do executes the request
 func (s *BroadcastChannelStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
 	numberOfRequestsToMake := len(s.clients)
 	log.Infof("Starting broadcast to [%d] downstream services", numberOfRequestsToMake)
@@ -66,6 +69,7 @@ func (s *BroadcastChannelStrategy) Do(_ context.Context, req *pb.TheRequest) (*p
 	return aggregatedResp, aggregatedErrors
 }
 
+// NewBroadcastChannel creates a new BroadcastChannelStrategy
 func NewBroadcastChannel(config *service.Config, servers []service.Server, clients []service.Client) (service.Strategy, error) {
 	if len(clients) < 2 || len(servers) != 1 {
 		var clientNames []string

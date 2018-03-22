@@ -45,6 +45,7 @@ func (c *theGrpcClient) Close() error {
 	return c.conn.Close()
 }
 
+// NewGrpcServerIfConfigured returns a gRPC-backed Server
 func NewGrpcServerIfConfigured(config *service.Config, serviceHandler *service.RequestHandler) (service.Server, error) {
 	if config.GrpcServerPort == -1 {
 		return nil, nil
@@ -68,6 +69,8 @@ func NewGrpcServerIfConfigured(config *service.Config, serviceHandler *service.R
 	return theGrpcServer, nil
 }
 
+// NewGrpcClientsIfConfigured takes in a Config and returns an instance of gRPC-backed Client for every configured gRPC
+// downstream service
 func NewGrpcClientsIfConfigured(config *service.Config) ([]service.Client, error) {
 	clients := make([]service.Client, 0)
 	for _, serverUrl := range config.GrpcDownstreamServers {

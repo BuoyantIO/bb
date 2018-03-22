@@ -16,20 +16,29 @@ import (
 )
 
 const (
-	HttpEgressStrategyName           = "http-egress"
-	HttpEgressUrlToInvokeArgName     = "url"
+	// HttpEgressStrategyName is the user-friendly name of this strategy
+	HttpEgressStrategyName = "http-egress"
+
+	// HttpEgressUrlToInvokeArgName is the parameter used to supply the URL to fetch from
+	HttpEgressUrlToInvokeArgName = "url"
+
+	// HttpEgressHttpMethodToUseArgName is the parameter used to supply the HTTP 1.1 method used when fetching the URL
 	HttpEgressHttpMethodToUseArgName = "method"
-	HttpEgressHttpTimeoutArgName     = "http-client-timeout"
+
+	// HttpEgressHttpTimeoutArgName is the timeout used to configure the HTTP client when fetching the URL
+	HttpEgressHttpTimeoutArgName = "http-client-timeout"
 )
 
 var validHttpMethods = map[string]bool{"GET": true, "POST": true, "PUT": true, "DELETE": true, "PATCH": true}
 
+// HttpEgressStrategy a strategy that makes a HTTP 1.1 call to a pre-configured URL
 type HttpEgressStrategy struct {
 	httpClientToUse *http.Client
 	urlToInvoke     string
 	methodToUse     string
 }
 
+// Do executes the request
 func (s *HttpEgressStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
 
 	httpRequest, err := http.NewRequest(s.methodToUse, s.urlToInvoke, strings.NewReader(req.RequestUid))
@@ -60,6 +69,7 @@ func (s *HttpEgressStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheR
 	return resp, err
 }
 
+// NewHttpEgress creates a new HttpEgressStrategy
 func NewHttpEgress(config *service.Config, servers []service.Server, clients []service.Client) (service.Strategy, error) {
 	if len(clients) != 0 || len(servers) == 0 {
 		return nil, fmt.Errorf("strategy [%s] requires at least one server port and exactly zero downstream services, but was configured as: %+v", HttpEgressStrategyName, config)
