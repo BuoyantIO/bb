@@ -27,8 +27,8 @@ var RootCmd = &cobra.Command{
 			log.Fatalf("invalid log-level: %s", logLevel)
 		}
 		log.SetLevel(level)
-		if config.Id == "" {
-			config.Id = fmt.Sprintf("%s-grpc:%d-h1:%d", cmd.Name(), config.GrpcServerPort, config.H1ServerPort)
+		if config.ID == "" {
+			config.ID = fmt.Sprintf("%s-grpc:%d-h1:%d", cmd.Name(), config.GRPCServerPort, config.H1ServerPort)
 		}
 	},
 }
@@ -43,13 +43,13 @@ func Execute() {
 }
 
 func init() {
-	RootCmd.PersistentFlags().StringVar(&config.Id, "id", "", "identifier for this container")
-	RootCmd.PersistentFlags().IntVar(&config.GrpcServerPort, "grpc-server-port", -1, "port to bind a gRPC server to")
+	RootCmd.PersistentFlags().StringVar(&config.ID, "id", "", "identifier for this container")
+	RootCmd.PersistentFlags().IntVar(&config.GRPCServerPort, "grpc-server-port", -1, "port to bind a gRPC server to")
 	RootCmd.PersistentFlags().IntVar(&config.H1ServerPort, "h1-server-port", -1, "port to bind a HTTP 1.1 server to")
 	RootCmd.PersistentFlags().IntVar(&config.PercentageFailedRequests, "percent-failure", 0, "percentage of requests that this service will automatically fail")
 	RootCmd.PersistentFlags().IntVar(&config.SleepInMillis, "sleep-in-millis", 0, "amount of milliseconds to wait before actually start processing as request")
 	RootCmd.PersistentFlags().BoolVar(&config.FireAndForget, "fire-and-forget", false, "do not wait for a response when contacting downstream services.")
-	RootCmd.PersistentFlags().StringSliceVar(&config.GrpcDownstreamServers, "grpc-downstream-server", []string{}, "list of servers (hostname:port) to send messages to using gRPC, can be repeated")
+	RootCmd.PersistentFlags().StringSliceVar(&config.GRPCDownstreamServers, "grpc-downstream-server", []string{}, "list of servers (hostname:port) to send messages to using gRPC, can be repeated")
 	RootCmd.PersistentFlags().StringSliceVar(&config.H1DownstreamServers, "h1-downstream-server", []string{}, "list of servers (protocol://hostname:port) to send messages to using HTTP 1.1, can be repeated")
 	RootCmd.PersistentFlags().DurationVar(&config.DownstreamConnectionTimeout, "downstream-timeout", time.Minute*1, "timeout to use when making downstream connections.")
 	RootCmd.PersistentFlags().StringVar(&logLevel, "log-level", log.DebugLevel.String(), "log level, must be one of: panic, fatal, error, warn, info, debug")

@@ -7,7 +7,7 @@ import (
 )
 
 type MockClient struct {
-	IdToReturn         string
+	IDToReturn         string
 	ResponseToReturn   *pb.TheResponse
 	ErrorToReturn      error
 	RequestReceived    *pb.TheRequest
@@ -20,7 +20,7 @@ func (m *MockClient) Close() error {
 	return m.ErrorToReturn
 }
 
-func (m *MockClient) GetId() string { return m.IdToReturn }
+func (m *MockClient) GetID() string { return m.IDToReturn }
 
 func (m *MockClient) Send(req *pb.TheRequest) (*pb.TheResponse, error) {
 	m.RequestReceived = req
@@ -31,10 +31,10 @@ func (m *MockClient) Send(req *pb.TheRequest) (*pb.TheResponse, error) {
 }
 
 type MockServer struct {
-	IdToReturn string
+	IDToReturn string
 }
 
-func (m MockServer) GetId() string { return m.IdToReturn }
+func (m MockServer) GetID() string { return m.IDToReturn }
 
 type MockStrategy struct {
 	ContextReceived  context.Context

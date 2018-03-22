@@ -23,7 +23,7 @@ func buildServers(config *service.Config, handler *service.RequestHandler) ([]se
 		servers = append(servers, grpcServer)
 	}
 
-	httpServer, err := protocols.NewHttpServerIfConfigured(config, handler)
+	httpServer, err := protocols.NewHTTPServerIfConfigured(config, handler)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func buildClients(config *service.Config) ([]service.Client, error) {
 	}
 	clients = append(clients, grpcClients...)
 
-	httpClients, err := protocols.NewHttpClientsIfConfigured(config)
+	httpClients, err := protocols.NewHTTPClientsIfConfigured(config)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func newService(config *service.Config, strategyName string) (*service.Service, 
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
-	log.Infof("Service [%s] is ready and waiting for incoming connections", config.Id)
+	log.Infof("Service [%s] is ready and waiting for incoming connections", config.ID)
 	<-stop
 	return service, nil
 }
@@ -105,7 +105,7 @@ var strategyByName = map[string]strategyConstructor{
 	strategies.PointToPointStrategyName:     strategies.NewPointToPointChannel,
 	strategies.BroadcastChannelStrategyName: strategies.NewBroadcastChannel,
 	strategies.TerminusStrategyName:         strategies.NewTerminusStrategy,
-	strategies.HttpEgressStrategyName:       strategies.NewHttpEgress,
+	strategies.HTTPEgressStrategyName:       strategies.NewHTTPEgress,
 }
 
 func newStrategyByName(strategyName string, config *service.Config, servers []service.Server, clients []service.Client) (service.Strategy, error) {

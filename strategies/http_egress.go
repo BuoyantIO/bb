@@ -16,46 +16,46 @@ import (
 )
 
 const (
-	// HttpEgressStrategyName is the user-friendly name of this strategy
-	HttpEgressStrategyName = "http-egress"
+	// HTTPEgressStrategyName is the user-friendly name of this strategy
+	HTTPEgressStrategyName = "http-egress"
 
-	// HttpEgressUrlToInvokeArgName is the parameter used to supply the URL to fetch from
-	HttpEgressUrlToInvokeArgName = "url"
+	// HTTPEgressURLToInvokeArgName is the parameter used to supply the URL to fetch from
+	HTTPEgressURLToInvokeArgName = "url"
 
-	// HttpEgressHttpMethodToUseArgName is the parameter used to supply the HTTP 1.1 method used when fetching the URL
-	HttpEgressHttpMethodToUseArgName = "method"
+	// HTTPEgressHTTPMethodToUseArgName is the parameter used to supply the HTTP 1.1 method used when fetching the URL
+	HTTPEgressHTTPMethodToUseArgName = "method"
 
-	// HttpEgressHttpTimeoutArgName is the timeout used to configure the HTTP client when fetching the URL
-	HttpEgressHttpTimeoutArgName = "http-client-timeout"
+	// HTTPEgressHTTPTimeoutArgName is the timeout used to configure the HTTP client when fetching the URL
+	HTTPEgressHTTPTimeoutArgName = "http-client-timeout"
 )
 
-var validHttpMethods = map[string]bool{"GET": true, "POST": true, "PUT": true, "DELETE": true, "PATCH": true}
+var validHTTPMethods = map[string]bool{"GET": true, "POST": true, "PUT": true, "DELETE": true, "PATCH": true}
 
-// HttpEgressStrategy a strategy that makes a HTTP 1.1 call to a pre-configured URL
-type HttpEgressStrategy struct {
+// HTTPEgressStrategy a strategy that makes a HTTP 1.1 call to a pre-configured URL
+type HTTPEgressStrategy struct {
 	httpClientToUse *http.Client
 	urlToInvoke     string
 	methodToUse     string
 }
 
 // Do executes the request
-func (s *HttpEgressStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
+func (s *HTTPEgressStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
 
-	httpRequest, err := http.NewRequest(s.methodToUse, s.urlToInvoke, strings.NewReader(req.RequestUid))
+	httpRequest, err := http.NewRequest(s.methodToUse, s.urlToInvoke, strings.NewReader(req.RequestUID))
 	if err != nil {
 		return nil, err
 	}
 
-	log.Infof("Making [%s] request to [%s] for requestUid [%s]", s.methodToUse, s.urlToInvoke, req.GetRequestUid())
+	log.Infof("Making [%s] request to [%s] for requestUID [%s]", s.methodToUse, s.urlToInvoke, req.GetRequestUID())
 	httpResp, err := s.httpClientToUse.Do(httpRequest)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Infof("Response from [%s] for requestUid [%s] was: %+v", s.urlToInvoke, req.GetRequestUid(), httpResp)
+	log.Infof("Response from [%s] for requestUID [%s] was: %+v", s.urlToInvoke, req.GetRequestUID(), httpResp)
 	statusCode := httpResp.StatusCode
 	if statusCode < 200 || statusCode > 299 {
-		return nil, fmt.Errorf("unexpected status returned by [%s]for requestUid [%s]: %d", s.urlToInvoke, req.GetRequestUid(), statusCode)
+		return nil, fmt.Errorf("unexpected status returned by [%s]for requestUID [%s]: %d", s.urlToInvoke, req.GetRequestUID(), statusCode)
 	}
 
 	bytes, err := ioutil.ReadAll(httpResp.Body)
@@ -69,22 +69,22 @@ func (s *HttpEgressStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheR
 	return resp, err
 }
 
-// NewHttpEgress creates a new HttpEgressStrategy
-func NewHttpEgress(config *service.Config, servers []service.Server, clients []service.Client) (service.Strategy, error) {
+// NewHTTPEgress creates a new HTTPEgressStrategy
+func NewHTTPEgress(config *service.Config, servers []service.Server, clients []service.Client) (service.Strategy, error) {
 	if len(clients) != 0 || len(servers) == 0 {
-		return nil, fmt.Errorf("strategy [%s] requires at least one server port and exactly zero downstream services, but was configured as: %+v", HttpEgressStrategyName, config)
+		return nil, fmt.Errorf("strategy [%s] requires at least one server port and exactly zero downstream services, but was configured as: %+v", HTTPEgressStrategyName, config)
 	}
 
-	urlToInvoke := config.ExtraArguments[HttpEgressUrlToInvokeArgName]
+	urlToInvoke := config.ExtraArguments[HTTPEgressURLToInvokeArgName]
 	if urlToInvoke == "" {
 		return nil, fmt.Errorf("URL to invoke is nil")
 	}
 
-	isHttp, err := regexp.MatchString("https?://", urlToInvoke)
+	isHTTP, err := regexp.MatchString("https?://", urlToInvoke)
 	if err != nil {
 		return nil, fmt.Errorf("error while validating URL [%s]: %v", urlToInvoke, err)
 	}
-	if !isHttp {
+	if !isHTTP {
 		return nil, fmt.Errorf("url must be HTTP or HTTPS, was [%s]", urlToInvoke)
 	}
 
@@ -93,14 +93,14 @@ func NewHttpEgress(config *service.Config, servers []service.Server, clients []s
 		return nil, fmt.Errorf("error while parsing URL [%s]: %v", urlToInvoke, err)
 	}
 
-	httpMethodToUse := config.ExtraArguments[HttpEgressHttpMethodToUseArgName]
-	if !validHttpMethods[httpMethodToUse] {
-		return nil, fmt.Errorf("HTTP method [%s] isn't supported [%v]", httpMethodToUse, validHttpMethods)
+	httpMethodToUse := config.ExtraArguments[HTTPEgressHTTPMethodToUseArgName]
+	if !validHTTPMethods[httpMethodToUse] {
+		return nil, fmt.Errorf("HTTP method [%s] isn't supported [%v]", httpMethodToUse, validHTTPMethods)
 	}
 
-	timeout, err := time.ParseDuration(config.ExtraArguments[HttpEgressHttpTimeoutArgName])
+	timeout, err := time.ParseDuration(config.ExtraArguments[HTTPEgressHTTPTimeoutArgName])
 	if err != nil {
-		return nil, fmt.Errorf("error while parsing timeout [%s]: %v", config.ExtraArguments[HttpEgressHttpTimeoutArgName], err)
+		return nil, fmt.Errorf("error while parsing timeout [%s]: %v", config.ExtraArguments[HTTPEgressHTTPTimeoutArgName], err)
 	}
 
 	httpClient := &http.Client{
@@ -108,7 +108,7 @@ func NewHttpEgress(config *service.Config, servers []service.Server, clients []s
 	}
 	log.Infof("HTTP client being used is: %+v", httpClient)
 
-	return &HttpEgressStrategy{
+	return &HTTPEgressStrategy{
 		urlToInvoke:     urlToInvoke,
 		methodToUse:     httpMethodToUse,
 		httpClientToUse: httpClient,

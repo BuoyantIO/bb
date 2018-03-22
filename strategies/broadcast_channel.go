@@ -30,12 +30,12 @@ func (s *BroadcastChannelStrategy) Do(_ context.Context, req *pb.TheRequest) (*p
 	allResults := make(chan interface{}, numberOfRequestsToMake)
 	for _, client := range s.clients {
 		go func(c service.Client) {
-			log.Infof("Making request to [%s]", c.GetId())
+			log.Infof("Making request to [%s]", c.GetID())
 			defer wg.Done()
 			clientResp, err := c.Send(req)
 			if err != nil {
-				log.Errorf("Error when broadcasting request [%v] to client [%s]: %v", req, c.GetId(), err)
-				allResults <- fmt.Errorf("downstream server [%s] returned error: %v", c.GetId(), err)
+				log.Errorf("Error when broadcasting request [%v] to client [%s]: %v", req, c.GetID(), err)
+				allResults <- fmt.Errorf("downstream server [%s] returned error: %v", c.GetID(), err)
 			} else {
 				allResults <- clientResp
 			}
@@ -74,12 +74,12 @@ func NewBroadcastChannel(config *service.Config, servers []service.Server, clien
 	if len(clients) < 2 || len(servers) != 1 {
 		var clientNames []string
 		for _, client := range clients {
-			clientNames = append(clientNames, client.GetId())
+			clientNames = append(clientNames, client.GetID())
 		}
 
 		var serverNames []string
 		for _, server := range servers {
-			serverNames = append(clientNames, server.GetId())
+			serverNames = append(clientNames, server.GetID())
 		}
 
 		return nil, fmt.Errorf("strategy [%s] requires exactly one server and more than one downstream services, but had clients [%s] servers [%s] and configured as: %+v", BroadcastChannelStrategyName, clientNames, serverNames, config)

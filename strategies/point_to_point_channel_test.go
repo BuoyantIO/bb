@@ -12,10 +12,10 @@ import (
 func TestPointToPointChannelStrategy(t *testing.T) {
 	t.Run("forwards all requests to strategy and returns its response", func(t *testing.T) {
 		expectedResponse := &pb.TheResponse{Payload: "1"}
-		mockClient := &service.MockClient{IdToReturn: "1", ResponseToReturn: expectedResponse}
+		mockClient := &service.MockClient{IDToReturn: "1", ResponseToReturn: expectedResponse}
 
 		expectedRequest := &pb.TheRequest{
-			RequestUid: "expected-req",
+			RequestUID: "expected-req",
 		}
 
 		strategy, err := NewPointToPointChannel(&service.Config{}, []service.Server{service.MockServer{}}, []service.Client{mockClient})
@@ -30,7 +30,7 @@ func TestPointToPointChannelStrategy(t *testing.T) {
 
 		actualRequest := mockClient.RequestReceived
 		if actualRequest != expectedRequest {
-			t.Fatalf("Expected client [%s] to receive request [%v], but got [%v]", mockClient.GetId(), expectedRequest, actualRequest)
+			t.Fatalf("Expected client [%s] to receive request [%v], but got [%v]", mockClient.GetID(), expectedRequest, actualRequest)
 		}
 
 		if actualResponse != expectedResponse {
@@ -39,10 +39,10 @@ func TestPointToPointChannelStrategy(t *testing.T) {
 	})
 
 	t.Run("forwards errors returned by clients", func(t *testing.T) {
-		mockClient := &service.MockClient{IdToReturn: "1", ErrorToReturn: errors.New("expected")}
+		mockClient := &service.MockClient{IDToReturn: "1", ErrorToReturn: errors.New("expected")}
 
 		expectedRequest := &pb.TheRequest{
-			RequestUid: "expected-req",
+			RequestUID: "expected-req",
 		}
 
 		strategy, err := NewPointToPointChannel(&service.Config{}, []service.Server{service.MockServer{}}, []service.Client{mockClient})
@@ -57,7 +57,7 @@ func TestPointToPointChannelStrategy(t *testing.T) {
 
 		actualRequest := mockClient.RequestReceived
 		if actualRequest != expectedRequest {
-			t.Fatalf("Expected client [%s] to receive request [%v], but got [%v]", mockClient.GetId(), expectedRequest, actualRequest)
+			t.Fatalf("Expected client [%s] to receive request [%v], but got [%v]", mockClient.GetID(), expectedRequest, actualRequest)
 		}
 	})
 }

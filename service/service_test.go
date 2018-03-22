@@ -11,7 +11,7 @@ import (
 
 func TestRequestHandler(t *testing.T) {
 	t.Run("delegates to underlying strategy", func(t *testing.T) {
-		expectedRequest := &pb.TheRequest{RequestUid: "expected req"}
+		expectedRequest := &pb.TheRequest{RequestUID: "expected req"}
 		expectedResponse := &pb.TheResponse{Payload: "expected resp"}
 		strategy := &MockStrategy{
 			ResponseToReturn: expectedResponse,
@@ -31,13 +31,13 @@ func TestRequestHandler(t *testing.T) {
 			t.Fatalf("Expected returned response to have payload [%s], but got [%s]", expectedResponse.Payload, actualResponse.Payload)
 		}
 
-		if actualResponse.RequestUid != expectedRequest.RequestUid {
-			t.Fatalf("Expected response to have uid [%s], but got [%s]", expectedRequest.RequestUid, actualResponse.RequestUid)
+		if actualResponse.RequestUID != expectedRequest.RequestUID {
+			t.Fatalf("Expected response to have UID [%s], but got [%s]", expectedRequest.RequestUID, actualResponse.RequestUID)
 		}
 	})
 
 	t.Run("returns error when underlying strategy has error", func(t *testing.T) {
-		expectedRequest := &pb.TheRequest{RequestUid: "expected req"}
+		expectedRequest := &pb.TheRequest{RequestUID: "expected req"}
 		expectedError := errors.New("expected")
 		strategy := &MockStrategy{
 			ErrorToReturn: expectedError,
@@ -55,7 +55,7 @@ func TestRequestHandler(t *testing.T) {
 	})
 
 	t.Run("will fail requests as per failure percentage", func(t *testing.T) {
-		expectedRequest := &pb.TheRequest{RequestUid: "expected req"}
+		expectedRequest := &pb.TheRequest{RequestUID: "expected req"}
 		expectedResponse := &pb.TheResponse{Payload: "expected resp"}
 		strategy := &MockStrategy{
 			ResponseToReturn: expectedResponse,
@@ -110,10 +110,10 @@ func TestFireAndForgetClient(t *testing.T) {
 	t.Run("calls underlying client and returns stub response", func(t *testing.T) {
 		barrier := make(chan bool)
 		expectedResponseToClose := errors.New("error to return on close")
-		expectedResponseToGetId := "some id goes here"
+		expectedResponseToGetID := "some id goes here"
 
 		underlyingClient := &MockClient{
-			IdToReturn:       expectedResponseToGetId,
+			IDToReturn:       expectedResponseToGetID,
 			ErrorToReturn:    expectedResponseToClose,
 			ResponseToReturn: &pb.TheResponse{Payload: "this will be ignored anyway"},
 			RequestInterceptor: func(req *pb.TheRequest) {
@@ -125,9 +125,9 @@ func TestFireAndForgetClient(t *testing.T) {
 			underlyingClient: underlyingClient,
 		}
 
-		actualResponseToGetId := fnfClient.GetId()
-		if actualResponseToGetId != expectedResponseToGetId {
-			t.Fatalf("Expected call to getId() to be delegated and return [%s], but got [%s]", expectedResponseToGetId, actualResponseToGetId)
+		actualResponseToGetID := fnfClient.GetID()
+		if actualResponseToGetID != expectedResponseToGetID {
+			t.Fatalf("Expected call to getID() to be delegated and return [%s], but got [%s]", expectedResponseToGetID, actualResponseToGetID)
 		}
 
 		actualResponseToClose := fnfClient.Close()
@@ -136,7 +136,7 @@ func TestFireAndForgetClient(t *testing.T) {
 		}
 
 		request := &pb.TheRequest{
-			RequestUid: "some request uid goes here",
+			RequestUID: "some request UID goes here",
 		}
 
 		response, err := fnfClient.Send(request)
@@ -144,7 +144,7 @@ func TestFireAndForgetClient(t *testing.T) {
 			t.Fatalf("Unexpected error: %v", expectedResponseToClose)
 		}
 
-		if !strings.Contains(response.Payload, "fire-and-forget") && !strings.Contains(response.Payload, request.RequestUid) {
+		if !strings.Contains(response.Payload, "fire-and-forget") && !strings.Contains(response.Payload, request.RequestUID) {
 			t.Fatalf("Expected response's payload to contain the fire-and-forget stub message, got [%v]", response)
 		}
 
@@ -166,7 +166,7 @@ func TestFireAndForgetClient(t *testing.T) {
 		}
 
 		request := &pb.TheRequest{
-			RequestUid: "some request uid goes here",
+			RequestUID: "some request UID goes here",
 		}
 
 		response, err := fnfClient.Send(request)
@@ -174,7 +174,7 @@ func TestFireAndForgetClient(t *testing.T) {
 			t.Fatalf("Unexpected error: %v", errors.New("error to return on close"))
 		}
 
-		if !strings.Contains(response.Payload, "fire-and-forget") && !strings.Contains(response.Payload, request.RequestUid) {
+		if !strings.Contains(response.Payload, "fire-and-forget") && !strings.Contains(response.Payload, request.RequestUID) {
 			t.Fatalf("Expected response's payload to contain the fire-and-forget stub message, got [%v]", response)
 		}
 

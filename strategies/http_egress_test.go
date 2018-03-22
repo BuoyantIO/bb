@@ -13,15 +13,15 @@ import (
 
 func TestHttpEgressStrategy(t *testing.T) {
 	t.Run("Rejects malformed or incomplete URLs", func(t *testing.T) {
-		malformedUrls := []string{"ftp://httpbin.org", "httpbin.org", "httpbin.org:80", "", "123"}
+		malformedURLs := []string{"ftp://httpbin.org", "httpbin.org", "httpbin.org:80", "", "123"}
 
-		for _, urlToInvoke := range malformedUrls {
+		for _, urlToInvoke := range malformedURLs {
 			httpConfig := &service.Config{
 				ExtraArguments: map[string]string{
-					HttpEgressUrlToInvokeArgName: urlToInvoke,
+					HTTPEgressURLToInvokeArgName: urlToInvoke,
 				},
 			}
-			_, err := NewHttpEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
+			_, err := NewHTTPEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
 			if err == nil {
 				t.Fatalf("Expecting error, got nothing when configuring url [%s]", urlToInvoke)
 			}
@@ -37,12 +37,12 @@ func TestHttpEgressStrategy(t *testing.T) {
 			urlToInvoke := fmt.Sprintf("%s://%s/anything", protocolToTest, expectedHost)
 			httpConfig := &service.Config{
 				ExtraArguments: map[string]string{
-					HttpEgressHttpMethodToUseArgName: "GET",
-					HttpEgressUrlToInvokeArgName:     urlToInvoke,
-					HttpEgressHttpTimeoutArgName:     "10s",
+					HTTPEgressHTTPMethodToUseArgName: "GET",
+					HTTPEgressURLToInvokeArgName:     urlToInvoke,
+					HTTPEgressHTTPTimeoutArgName:     "10s",
 				},
 			}
-			egress, err := NewHttpEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
+			egress, err := NewHTTPEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
@@ -56,10 +56,10 @@ func TestHttpEgressStrategy(t *testing.T) {
 			var jsonPayload map[string]interface{}
 			json.Unmarshal([]byte(response.Payload), &jsonPayload)
 
-			expectedUrl := urlToInvoke
-			actualUrl := jsonPayload["url"]
-			if actualUrl != expectedUrl {
-				t.Fatalf("Expected HTTP method to be [%s], but got [%s]", expectedUrl, actualUrl)
+			expectedURL := urlToInvoke
+			actualURL := jsonPayload["url"]
+			if actualURL != expectedURL {
+				t.Fatalf("Expected HTTP method to be [%s], but got [%s]", expectedURL, actualURL)
 			}
 
 			expectedMethod := "GET"
@@ -86,12 +86,12 @@ func TestHttpEgressStrategy(t *testing.T) {
 
 			httpConfig := &service.Config{
 				ExtraArguments: map[string]string{
-					HttpEgressUrlToInvokeArgName:     urlToInvoke,
-					HttpEgressHttpMethodToUseArgName: methodToTest,
-					HttpEgressHttpTimeoutArgName:     "10s",
+					HTTPEgressURLToInvokeArgName:     urlToInvoke,
+					HTTPEgressHTTPMethodToUseArgName: methodToTest,
+					HTTPEgressHTTPTimeoutArgName:     "10s",
 				},
 			}
-			egress, err := NewHttpEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
+			egress, err := NewHTTPEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
@@ -105,17 +105,17 @@ func TestHttpEgressStrategy(t *testing.T) {
 			var jsonPayload map[string]interface{}
 			json.Unmarshal([]byte(response.Payload), &jsonPayload)
 
-			expectedUrl := urlToInvoke
-			actualUrl := jsonPayload["url"]
-			if actualUrl != expectedUrl {
-				t.Fatalf("Expected HTTP method to be [%s], but got [%s]", expectedUrl, actualUrl)
+			expectedURL := urlToInvoke
+			actualURL := jsonPayload["url"]
+			if actualURL != expectedURL {
+				t.Fatalf("Expected HTTP method to be [%s], but got [%s]", expectedURL, actualURL)
 			}
 
 			headers := jsonPayload["headers"].(map[string]interface{})
 
 			actualHostHeader := headers["Host"]
 			if actualHostHeader != expectedHost {
-				t.Fatalf("Expected Hist header to be [%s], but got [%s]", expectedHost, actualHostHeader)
+				t.Fatalf("Expected Host header to be [%s], but got [%s]", expectedHost, actualHostHeader)
 			}
 		}
 	})
@@ -129,12 +129,12 @@ func TestHttpEgressStrategy(t *testing.T) {
 			urlToInvoke := fmt.Sprintf("https://httpbin.org/status/%d", statusToReturn)
 			httpConfig := &service.Config{
 				ExtraArguments: map[string]string{
-					HttpEgressHttpMethodToUseArgName: "GET",
-					HttpEgressUrlToInvokeArgName:     urlToInvoke,
-					HttpEgressHttpTimeoutArgName:     "10s",
+					HTTPEgressHTTPMethodToUseArgName: "GET",
+					HTTPEgressURLToInvokeArgName:     urlToInvoke,
+					HTTPEgressHTTPTimeoutArgName:     "10s",
 				},
 			}
-			egress, err := NewHttpEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
+			egress, err := NewHTTPEgress(httpConfig, []service.Server{service.MockServer{}}, []service.Client{})
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}

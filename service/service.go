@@ -12,10 +12,10 @@ import (
 
 // Config holds the ,ain configuration for this service.
 type Config struct {
-	Id                          string
-	GrpcServerPort              int
+	ID                          string
+	GRPCServerPort              int
 	H1ServerPort                int
-	GrpcDownstreamServers       []string
+	GRPCDownstreamServers       []string
 	H1DownstreamServers         []string
 	PercentageFailedRequests    int
 	SleepInMillis               int
@@ -27,7 +27,7 @@ type Config struct {
 // Client is an abstraction representing a client connection to each downstream service.
 type Client interface {
 	Close() error
-	GetId() string
+	GetID() string
 	Send(*pb.TheRequest) (*pb.TheResponse, error)
 }
 
@@ -37,17 +37,17 @@ type fireAndForgetClient struct {
 
 func (f *fireAndForgetClient) Close() error { return f.underlyingClient.Close() }
 
-func (f *fireAndForgetClient) GetId() string { return f.underlyingClient.GetId() }
+func (f *fireAndForgetClient) GetID() string { return f.underlyingClient.GetID() }
 
 func (f *fireAndForgetClient) Send(req *pb.TheRequest) (*pb.TheResponse, error) {
 	go func(c Client, req *pb.TheRequest) {
-		log.Infof("Sending fire-and-forget request to [%s] for request uid [%s]", f.GetId(), req.RequestUid)
+		log.Infof("Sending fire-and-forget request to [%s] for request UID [%s]", f.GetID(), req.RequestUID)
 		response, err := c.Send(req)
-		log.Infof("Response from fire-and-forget request to [%s] for request uid [%s] was: %s error %v", f.GetId(), req.RequestUid, response, err)
+		log.Infof("Response from fire-and-forget request to [%s] for request UID [%s] was: %s error %v", f.GetID(), req.RequestUID, response, err)
 	}(f.underlyingClient, req)
 
 	stubResponse := &pb.TheResponse{
-		Payload: fmt.Sprintf("Stub response for fire-and-forget request to [%s] for request uid [%s]", f.GetId(), req.RequestUid),
+		Payload: fmt.Sprintf("Stub response for fire-and-forget request to [%s] for request UID [%s]", f.GetID(), req.RequestUID),
 	}
 	return stubResponse, nil
 }
@@ -59,7 +59,7 @@ func MakeFireAndForget(client Client) Client {
 
 // Server is an abstraction representing each server made available to receive inbound connections.
 type Server interface {
-	GetId() string
+	GetID() string
 }
 
 // Strategy is the algorithm applied by this service when it receives requests (c.f. http://wiki.c2.com/?StrategyPattern)
@@ -78,14 +78,14 @@ func (h *RequestHandler) Handle(ctx context.Context, req *pb.TheRequest) (*pb.Th
 	sleepForConfiguredTime(h)
 
 	if shouldFailThisRequest(h) {
-		return nil, fmt.Errorf("this error was injected by [%s]", h.Config.Id)
+		return nil, fmt.Errorf("this error was injected by [%s]", h.Config.ID)
 	}
 
-	reqId := req.RequestUid
+	reqID := req.RequestUID
 
 	resp, err := h.Strategy.Do(ctx, req)
 	if resp != nil {
-		resp.RequestUid = reqId
+		resp.RequestUID = reqID
 	}
 	return resp, err
 }

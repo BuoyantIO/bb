@@ -20,6 +20,7 @@ type TerminusStrategy struct {
 	config *service.Config
 }
 
+// Do executes the request
 func (s *TerminusStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
 	messageToReturn := fmt.Sprintf("terminus at [%d]", time.Now().Nanosecond())
 	if s.config.ExtraArguments[TerminusResponseTextArgName] != "" {

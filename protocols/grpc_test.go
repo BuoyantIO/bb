@@ -16,7 +16,7 @@ func TestTheGrpcServer(t *testing.T) {
 		}
 
 		expectedProtoRequest := &pb.TheRequest{
-			RequestUid: "123",
+			RequestUID: "123",
 		}
 
 		strategy := &stubStrategy{
@@ -44,7 +44,7 @@ func TestTheGrpcServer(t *testing.T) {
 		expectedError := errors.New("expected")
 
 		expectedProtoRequest := &pb.TheRequest{
-			RequestUid: "123",
+			RequestUID: "123",
 		}
 
 		strategy := &stubStrategy{

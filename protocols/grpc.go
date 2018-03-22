@@ -16,13 +16,13 @@ type theGrpcServer struct {
 	serviceHandler *service.RequestHandler
 }
 
-func (s *theGrpcServer) GetId() string {
+func (s *theGrpcServer) GetID() string {
 	return fmt.Sprintf("grpc-%d", s.port)
 }
 
 func (s *theGrpcServer) TheFunction(ctx context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
 	resp, err := s.serviceHandler.Handle(ctx, req)
-	log.Infof("Received gRPC request [%s] [%s] Returning response [%+v]", req.RequestUid, req, resp)
+	log.Infof("Received gRPC request [%s] [%s] Returning response [%+v]", req.RequestUID, req, resp)
 	return resp, err
 }
 
@@ -32,7 +32,7 @@ type theGrpcClient struct {
 	grpcClient pb.TheServiceClient
 }
 
-func (c *theGrpcClient) GetId() string {
+func (c *theGrpcClient) GetID() string {
 	return c.id
 }
 
@@ -47,11 +47,11 @@ func (c *theGrpcClient) Close() error {
 
 // NewGrpcServerIfConfigured returns a gRPC-backed Server
 func NewGrpcServerIfConfigured(config *service.Config, serviceHandler *service.RequestHandler) (service.Server, error) {
-	if config.GrpcServerPort == -1 {
+	if config.GRPCServerPort == -1 {
 		return nil, nil
 	}
 
-	grpcServerPort := config.GrpcServerPort
+	grpcServerPort := config.GRPCServerPort
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcServerPort))
 	if err != nil {
 		return nil, err
@@ -73,14 +73,14 @@ func NewGrpcServerIfConfigured(config *service.Config, serviceHandler *service.R
 // downstream service
 func NewGrpcClientsIfConfigured(config *service.Config) ([]service.Client, error) {
 	clients := make([]service.Client, 0)
-	for _, serverUrl := range config.GrpcDownstreamServers {
-		conn, err := grpc.Dial(serverUrl, grpc.WithInsecure())
+	for _, serverURL := range config.GRPCDownstreamServers {
+		conn, err := grpc.Dial(serverURL, grpc.WithInsecure())
 		if err != nil {
 			return nil, err
 		}
 
 		client := pb.NewTheServiceClient(conn)
-		clients = append(clients, &theGrpcClient{id: serverUrl, conn: conn, grpcClient: client})
+		clients = append(clients, &theGrpcClient{id: serverURL, conn: conn, grpcClient: client})
 	}
 
 	return clients, nil
