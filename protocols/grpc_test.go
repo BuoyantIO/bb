@@ -23,7 +23,9 @@ func TestTheGrpcServer(t *testing.T) {
 			theResponseToReturn: expectedProtoResponse,
 		}
 
-		grpcServer := theGrpcServer{serviceHandler: &service.RequestHandler{Config: &service.Config{}, Strategy: strategy}}
+		requestHandler := service.NewRequestHandler(&service.Config{})
+		requestHandler.Strategy = strategy
+		grpcServer := theGrpcServer{serviceHandler: requestHandler}
 
 		actualProtoResponse, err := grpcServer.TheFunction(context.TODO(), expectedProtoRequest)
 		if err != nil {
@@ -51,7 +53,9 @@ func TestTheGrpcServer(t *testing.T) {
 			theErrorToReturn: expectedError,
 		}
 
-		grpcServer := theGrpcServer{serviceHandler: &service.RequestHandler{Config: &service.Config{}, Strategy: strategy}}
+		requestHandler := service.NewRequestHandler(&service.Config{})
+		requestHandler.Strategy = strategy
+		grpcServer := theGrpcServer{serviceHandler: requestHandler}
 
 		_, actualError := grpcServer.TheFunction(context.TODO(), expectedProtoRequest)
 		if actualError == nil {

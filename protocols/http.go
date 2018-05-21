@@ -1,6 +1,7 @@
 package protocols
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -19,7 +20,8 @@ import (
 var marshaller = &jsonpb.Marshaler{}
 
 type theHTTPServer struct {
-	port int
+	httpServer *http.Server
+	port       int
 }
 
 type httpHandler struct {
@@ -28,6 +30,11 @@ type httpHandler struct {
 
 func (s *theHTTPServer) GetID() string {
 	return fmt.Sprintf("h1-%d", s.port)
+}
+
+func (s *theHTTPServer) Shutdown() error {
+	log.Infof("Shutting down [%s]", s.GetID())
+	return s.httpServer.Shutdown(context.Background())
 }
 
 func (h *httpHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -41,7 +48,7 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 		protoReq = r
 	} else {
-		newRequestUID := newRequestUID("http", h.serviceHandler.Config)
+		newRequestUID := newRequestUID("http", h.serviceHandler.ConfigID())
 		log.Infof("Received request with empty body, assigning new request UID [%s] to it", newRequestUID)
 		protoReq = pb.TheRequest{
 			RequestUID: newRequestUID,
@@ -90,8 +97,8 @@ func (c *httpClient) Send(req *pb.TheRequest) (*pb.TheResponse, error) {
 	return &protoResp, err
 }
 
-func newRequestUID(inboundType string, config *service.Config) string {
-	return fmt.Sprintf("in:%s-sid:%s-%d", inboundType, config.ID, time.Now().Nanosecond())
+func newRequestUID(inboundType string, configID string) string {
+	return fmt.Sprintf("in:%s-sid:%s-%d", inboundType, configID, time.Now().Nanosecond())
 }
 
 func marshallProtobufToJSON(msg proto.Message) (string, error) {
@@ -153,14 +160,18 @@ func NewHTTPServerIfConfigured(config *service.Config, serviceHandler *service.R
 		return nil, nil
 	}
 
-	handler := newHTTPHandler(serviceHandler)
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%d", config.H1ServerPort),
+		Handler: newHTTPHandler(serviceHandler),
+	}
 	go func() {
 		log.Infof("HTTP 1.1 server listening on port [%d]", config.H1ServerPort)
-		http.ListenAndServe(fmt.Sprintf(":%d", config.H1ServerPort), handler)
+		srv.ListenAndServe()
 	}()
 
 	return &theHTTPServer{
-		port: config.H1ServerPort,
+		port:       config.H1ServerPort,
+		httpServer: srv,
 	}, nil
 }
 

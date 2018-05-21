@@ -19,6 +19,7 @@ type Config struct {
 	H1DownstreamServers         []string
 	PercentageFailedRequests    int
 	SleepInMillis               int
+	TerminateAfter              int
 	FireAndForget               bool
 	DownstreamConnectionTimeout time.Duration
 	ExtraArguments              map[string]string
@@ -60,6 +61,7 @@ func MakeFireAndForget(client Client) Client {
 // Server is an abstraction representing each server made available to receive inbound connections.
 type Server interface {
 	GetID() string
+	Shutdown() error
 }
 
 // Strategy is the algorithm applied by this service when it receives requests (c.f. http://wiki.c2.com/?StrategyPattern)
@@ -67,10 +69,52 @@ type Strategy interface {
 	Do(context.Context, *pb.TheRequest) (*pb.TheResponse, error)
 }
 
+//
+// TODO: move RequestHandler into its own file
+//
+
 // RequestHandler is a protocol-independent request/response handler interface
 type RequestHandler struct {
-	Config   *Config
-	Strategy Strategy
+	Strategy Strategy // public due to circular dependency between server and strategy
+
+	config       *Config
+	stopCh       chan struct{}
+	requestCount int
+	counterCh    chan struct{}
+}
+
+// requestCounter approximates an atomic read/write counter via channels
+func (h *RequestHandler) requestCounter() {
+	for range h.counterCh {
+		h.requestCount++
+		if h.requestCount == h.config.TerminateAfter {
+			log.Infof("TerminateAfter limit hit (%d), stopping [%s]", h.config.TerminateAfter, h.config.ID)
+			h.stopCh <- struct{}{}
+		}
+	}
+}
+
+func NewRequestHandler(config *Config) *RequestHandler {
+	h := &RequestHandler{
+		config:       config,
+		stopCh:       make(chan struct{}),
+		requestCount: 0,
+		counterCh:    make(chan struct{}),
+	}
+
+	if h.config.TerminateAfter != 0 {
+		go h.requestCounter()
+	}
+
+	return h
+}
+
+func (h *RequestHandler) ConfigID() string {
+	return h.config.ID
+}
+
+func (h *RequestHandler) Stopping() <-chan struct{} {
+	return h.stopCh
 }
 
 // Handle takes in a request, processes it accordingly to its Strategy, an returns the response.
@@ -78,7 +122,11 @@ func (h *RequestHandler) Handle(ctx context.Context, req *pb.TheRequest) (*pb.Th
 	sleepForConfiguredTime(h)
 
 	if shouldFailThisRequest(h) {
-		return nil, fmt.Errorf("this error was injected by [%s]", h.Config.ID)
+		return nil, fmt.Errorf("this error was injected by [%s]", h.config.ID)
+	}
+
+	if h.config.TerminateAfter != 0 {
+		h.counterCh <- struct{}{}
 	}
 
 	reqID := req.RequestUID
@@ -91,11 +139,11 @@ func (h *RequestHandler) Handle(ctx context.Context, req *pb.TheRequest) (*pb.Th
 }
 
 func sleepForConfiguredTime(h *RequestHandler) {
-	time.Sleep(time.Duration(int64(h.Config.SleepInMillis)) * time.Millisecond)
+	time.Sleep(time.Duration(int64(h.config.SleepInMillis)) * time.Millisecond)
 }
 
 func shouldFailThisRequest(h *RequestHandler) bool {
-	perc := h.Config.PercentageFailedRequests
+	perc := h.config.PercentageFailedRequests
 	rnd := rand.Intn(100)
 	return rnd < perc
 }
