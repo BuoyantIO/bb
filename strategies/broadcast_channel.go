@@ -15,7 +15,7 @@ import (
 // BroadcastChannelStrategyName is the user-friendly name of this strategy
 const BroadcastChannelStrategyName = "broadcast-channel"
 
-// BroadcastChannelStrategy is a strategy that will take in a request and broadact it to all downstream services.
+// BroadcastChannelStrategy is a strategy that will take in a request and broadcast it to all downstream services.
 type BroadcastChannelStrategy struct {
 	clients []service.Client
 }

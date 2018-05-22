@@ -36,6 +36,8 @@ type MockServer struct {
 
 func (m MockServer) GetID() string { return m.IDToReturn }
 
+func (m MockServer) Shutdown() error { return nil }
+
 type MockStrategy struct {
 	ContextReceived  context.Context
 	RequestReceived  *pb.TheRequest

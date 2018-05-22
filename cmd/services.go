@@ -62,9 +62,7 @@ func buildClients(config *service.Config) ([]service.Client, error) {
 
 func newService(config *service.Config, strategyName string) (*service.Service, error) {
 
-	handler := &service.RequestHandler{
-		Config: config,
-	}
+	handler := service.NewRequestHandler(config)
 
 	servers, err := buildServers(config, handler)
 	if err != nil {
@@ -95,7 +93,18 @@ func newService(config *service.Config, strategyName string) (*service.Service, 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	log.Infof("Service [%s] is ready and waiting for incoming connections", config.ID)
-	<-stop
+
+	select {
+	case <-stop:
+		log.Infof("Stopping service [%s] due to interrupt", config.ID)
+	case <-handler.Stopping():
+		log.Infof("Stopping service [%s] due to handler", config.ID)
+	}
+
+	for _, server := range servers {
+		server.Shutdown()
+	}
+
 	return service, nil
 }
 

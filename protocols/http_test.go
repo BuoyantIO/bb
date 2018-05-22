@@ -22,7 +22,9 @@ func TestTheHTTPServer(t *testing.T) {
 			theResponseToReturn: expectedProtoResponse,
 		}
 
-		handler := newHTTPHandler(&service.RequestHandler{Strategy: strategy, Config: &service.Config{}})
+		requestHandler := service.NewRequestHandler(&service.Config{})
+		requestHandler.Strategy = strategy
+		handler := newHTTPHandler(requestHandler)
 		theServer := httptest.NewServer(handler)
 		defer theServer.Close()
 
@@ -68,7 +70,9 @@ func TestTheHTTPServer(t *testing.T) {
 			theResponseToReturn: expectedProtoResponse,
 		}
 
-		handler := newHTTPHandler(&service.RequestHandler{Config: &service.Config{}, Strategy: strategy})
+		requestHandler := service.NewRequestHandler(&service.Config{})
+		requestHandler.Strategy = strategy
+		handler := newHTTPHandler(requestHandler)
 		theServer := httptest.NewServer(handler)
 		defer theServer.Close()
 
@@ -109,7 +113,9 @@ func TestTheHTTPServer(t *testing.T) {
 	t.Run("returns a 500 if payload is not the expected protobuf as json", func(t *testing.T) {
 		strategy := &stubStrategy{}
 
-		handler := newHTTPHandler(&service.RequestHandler{Config: &service.Config{}, Strategy: strategy})
+		requestHandler := service.NewRequestHandler(&service.Config{})
+		requestHandler.Strategy = strategy
+		handler := newHTTPHandler(requestHandler)
 		theServer := httptest.NewServer(handler)
 		defer theServer.Close()
 
@@ -146,7 +152,9 @@ func TestTheHTTPServer(t *testing.T) {
 			t.Fatalf("Unexpected error: %v", err)
 		}
 
-		handler := newHTTPHandler(&service.RequestHandler{Config: &service.Config{}, Strategy: strategy})
+		requestHandler := service.NewRequestHandler(&service.Config{})
+		requestHandler.Strategy = strategy
+		handler := newHTTPHandler(requestHandler)
 		theServer := httptest.NewServer(handler)
 		defer theServer.Close()
 
@@ -194,7 +202,9 @@ func TestHTTPClient(t *testing.T) {
 			theResponseToReturn: expectedProtoResponse,
 		}
 
-		handler := newHTTPHandler(&service.RequestHandler{Config: &service.Config{}, Strategy: strategy})
+		requestHandler := service.NewRequestHandler(&service.Config{})
+		requestHandler.Strategy = strategy
+		handler := newHTTPHandler(requestHandler)
 		theServer := httptest.NewServer(handler)
 		defer theServer.Close()
 
@@ -228,7 +238,9 @@ func TestHTTPClient(t *testing.T) {
 			theErrorToReturn: errors.New("this error was injected by [terminus-grpc:-1-h1:9090]"),
 		}
 
-		handler := newHTTPHandler(&service.RequestHandler{Config: &service.Config{}, Strategy: strategy})
+		requestHandler := service.NewRequestHandler(&service.Config{})
+		requestHandler.Strategy = strategy
+		handler := newHTTPHandler(requestHandler)
 		theServer := httptest.NewServer(handler)
 		defer theServer.Close()
 

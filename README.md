@@ -108,7 +108,8 @@ A test run using the Docker CLI should return usage information and confirm that
           --id string                            identifier for this container
           --log-level string                     log level, must be one of: panic, fatal, error, warn, info, debug (default "debug")
           --percent-failure int                  percentage of requests that this service will automatically fail
-          --sleep-in-millis int                  amount of milliseconds to wait before actually start processing as request
+          --sleep-in-millis int                  amount of milliseconds to wait before actually start processing a request
+          --terminate-after int                  terminate the process after this many requests
 
     Use "bb [command] --help" for more information about a command.
 

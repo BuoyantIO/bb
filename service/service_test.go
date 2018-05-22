@@ -18,7 +18,7 @@ func TestRequestHandler(t *testing.T) {
 		}
 
 		handler := RequestHandler{
-			Config:   &Config{},
+			config:   &Config{},
 			Strategy: strategy,
 		}
 
@@ -44,7 +44,7 @@ func TestRequestHandler(t *testing.T) {
 		}
 
 		handler := RequestHandler{
-			Config:   &Config{},
+			config:   &Config{},
 			Strategy: strategy,
 		}
 
@@ -62,21 +62,21 @@ func TestRequestHandler(t *testing.T) {
 		}
 
 		neverFailHandler := RequestHandler{
-			Config: &Config{
+			config: &Config{
 				PercentageFailedRequests: 0,
 			},
 			Strategy: strategy,
 		}
 
 		alwaysFailHandler := RequestHandler{
-			Config: &Config{
+			config: &Config{
 				PercentageFailedRequests: 100,
 			},
 			Strategy: strategy,
 		}
 
 		sometimesFailHandler := RequestHandler{
-			Config: &Config{
+			config: &Config{
 				PercentageFailedRequests: 70,
 			},
 			Strategy: strategy,
@@ -102,6 +102,36 @@ func TestRequestHandler(t *testing.T) {
 
 		if len(resultsForSometimesError) == 0 {
 			t.Fatalf("Expected sometimes error to fail at least once, but it didnt fail")
+		}
+	})
+
+	t.Run("will exit after a specified number of requests", func(t *testing.T) {
+		expectedRequest := &pb.TheRequest{RequestUID: "expected req"}
+		expectedResponse := &pb.TheResponse{Payload: "expected resp"}
+		strategy := &MockStrategy{
+			ResponseToReturn: expectedResponse,
+		}
+
+		terminateLimit := 2
+		terminateHandler := NewRequestHandler(&Config{TerminateAfter: terminateLimit})
+		terminateHandler.Strategy = strategy
+
+		for i := 0; i < terminateLimit; i++ {
+			_, err := terminateHandler.Handle(context.TODO(), expectedRequest)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			if i+1 < terminateLimit {
+				select {
+				case <-terminateHandler.Stopping():
+					t.Fatalf("RequestHandler terminated when it should not have: %d != %d", i+1, terminateLimit)
+				default:
+				}
+			} else {
+				// this will timeout the test if it fails
+				<-terminateHandler.Stopping()
+			}
 		}
 	})
 }

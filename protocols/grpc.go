@@ -12,12 +12,19 @@ import (
 )
 
 type theGrpcServer struct {
+	grpcServer     *grpc.Server
 	port           int
 	serviceHandler *service.RequestHandler
 }
 
 func (s *theGrpcServer) GetID() string {
 	return fmt.Sprintf("grpc-%d", s.port)
+}
+
+func (s *theGrpcServer) Shutdown() error {
+	log.Infof("Shutting down [%s]", s.GetID())
+	s.grpcServer.GracefulStop()
+	return nil
 }
 
 func (s *theGrpcServer) TheFunction(ctx context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
@@ -59,6 +66,7 @@ func NewGrpcServerIfConfigured(config *service.Config, serviceHandler *service.R
 	grpcServer := grpc.NewServer()
 
 	theGrpcServer := &theGrpcServer{
+		grpcServer:     grpcServer,
 		port:           grpcServerPort,
 		serviceHandler: serviceHandler,
 	}
