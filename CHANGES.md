@@ -1,3 +1,7 @@
+## v0.0.3
+
+* Update docs and example files to latest release.
+
 ## v0.0.2
 
 * Introduce `terminate-after` flag, which instructs the process to shutdown

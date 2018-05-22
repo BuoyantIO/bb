@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.1
+        image: buoyantio/bb:v0.0.3
         args: ["broadcast-channel", "--h1-server-port", "80",
         "--h1-downstream-server", "http://heavy-east-west-lab-t1-n1-svc:80",
         "--h1-downstream-server", "http://heavy-east-west-lab-t1-n2-svc:80",
@@ -68,7 +68,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.1
+        image: buoyantio/bb:v0.0.3
         args: ["broadcast-channel", "--h1-server-port", "80",
         "--grpc-downstream-server", "heavy-east-west-lab-t2-n1-svc:80",
         "--grpc-downstream-server", "heavy-east-west-lab-t2-n2-svc:80",
@@ -110,7 +110,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.1
+        image: buoyantio/bb:v0.0.3
         args: ["broadcast-channel", "--h1-server-port", "80",
         "--grpc-downstream-server", "heavy-east-west-lab-t2-n1-svc:80",
         "--grpc-downstream-server", "heavy-east-west-lab-t2-n2-svc:80",
@@ -152,7 +152,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.1
+        image: buoyantio/bb:v0.0.3
         args: ["broadcast-channel", "--h1-server-port", "80",
         "--grpc-downstream-server", "heavy-east-west-lab-t2-n1-svc:80",
         "--grpc-downstream-server", "heavy-east-west-lab-t2-n2-svc:80",
@@ -194,7 +194,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.1
+        image: buoyantio/bb:v0.0.3
         args: ["broadcast-channel", "--h1-server-port", "80",
         "--grpc-downstream-server", "heavy-east-west-lab-t2-n1-svc:80",
         "--grpc-downstream-server", "heavy-east-west-lab-t2-n2-svc:80",
@@ -236,7 +236,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.1
+        image: buoyantio/bb:v0.0.3
         args: ["broadcast-channel", "--h1-server-port", "80",
         "--grpc-downstream-server", "heavy-east-west-lab-t2-n1-svc:80",
         "--grpc-downstream-server", "heavy-east-west-lab-t2-n2-svc:80",
@@ -280,7 +280,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.1
+        image: buoyantio/bb:v0.0.3
         args: ["terminus", "--grpc-server-port", "80", "--response-text", "t2-n1",
         "--fire-and-forget"]
         ports:
@@ -317,7 +317,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.1
+        image: buoyantio/bb:v0.0.3
         args: ["terminus", "--grpc-server-port", "80", "--response-text", "t2-n2",
         "--fire-and-forget"]
         ports:
@@ -354,7 +354,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.1
+        image: buoyantio/bb:v0.0.3
         args: ["terminus", "--grpc-server-port", "80", "--response-text", "t2-n3",
         "--fire-and-forget"]
         ports:
@@ -391,7 +391,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.1
+        image: buoyantio/bb:v0.0.3
         args: ["terminus", "--grpc-server-port", "80", "--response-text", "t2-n4",
         "--fire-and-forget"]
         ports:
@@ -428,7 +428,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.1
+        image: buoyantio/bb:v0.0.3
         args: ["terminus", "--grpc-server-port", "80", "--response-text", "t2-n5",
         "--fire-and-forget"]
         ports:
