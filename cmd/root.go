@@ -51,6 +51,7 @@ func init() {
 	RootCmd.PersistentFlags().IntVar(&config.TerminateAfter, "terminate-after", 0, "terminate the process after this many requests")
 	RootCmd.PersistentFlags().BoolVar(&config.FireAndForget, "fire-and-forget", false, "do not wait for a response when contacting downstream services.")
 	RootCmd.PersistentFlags().StringSliceVar(&config.GRPCDownstreamServers, "grpc-downstream-server", []string{}, "list of servers (hostname:port) to send messages to using gRPC, can be repeated")
+	RootCmd.PersistentFlags().StringSliceVar(&config.GRPCDownstreamAuthorities, "grpc-downstream-authority", []string{}, "list of authority headers to specify routing, if set, ordering and count should match grpc-downstream-server")
 	RootCmd.PersistentFlags().StringSliceVar(&config.H1DownstreamServers, "h1-downstream-server", []string{}, "list of servers (protocol://hostname:port) to send messages to using HTTP 1.1, can be repeated")
 	RootCmd.PersistentFlags().DurationVar(&config.DownstreamConnectionTimeout, "downstream-timeout", time.Minute*1, "timeout to use when making downstream connections.")
 	RootCmd.PersistentFlags().StringVar(&logLevel, "log-level", log.DebugLevel.String(), "log level, must be one of: panic, fatal, error, warn, info, debug")
