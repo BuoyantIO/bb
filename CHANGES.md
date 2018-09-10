@@ -1,3 +1,8 @@
+## v0.0.4
+
+* Introduce `grpc-downstream-authority` flag, to enable setting authority
+  separately from `grpc-downstream-server`.
+
 ## v0.0.3
 
 * Update docs and example files to latest release.

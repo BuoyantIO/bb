@@ -81,8 +81,24 @@ func NewGrpcServerIfConfigured(config *service.Config, serviceHandler *service.R
 // downstream service
 func NewGrpcClientsIfConfigured(config *service.Config) ([]service.Client, error) {
 	clients := make([]service.Client, 0)
-	for _, serverURL := range config.GRPCDownstreamServers {
-		conn, err := grpc.Dial(serverURL, grpc.WithInsecure())
+
+	withAuthorities := false
+	if len(config.GRPCDownstreamAuthorities) > 0 {
+		if len(config.GRPCDownstreamAuthorities) != len(config.GRPCDownstreamServers) {
+			err := fmt.Errorf("Authorities count (%d) does not match gRPC downstream server count (%d)", len(config.GRPCDownstreamAuthorities), len(config.GRPCDownstreamServers))
+			log.Error(err)
+			return nil, err
+		}
+
+		withAuthorities = true
+	}
+
+	for i, serverURL := range config.GRPCDownstreamServers {
+		authority := ""
+		if withAuthorities {
+			authority = config.GRPCDownstreamAuthorities[i]
+		}
+		conn, err := grpc.Dial(serverURL, grpc.WithInsecure(), grpc.WithAuthority(authority))
 		if err != nil {
 			return nil, err
 		}
