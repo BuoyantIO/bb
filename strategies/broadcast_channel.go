@@ -37,6 +37,7 @@ func (s *BroadcastChannelStrategy) Do(_ context.Context, req *pb.TheRequest) (*p
 				log.Errorf("Error when broadcasting request [%v] to client [%s]: %v", req, c.GetID(), err)
 				allResults <- fmt.Errorf("downstream server [%s] returned error: %v", c.GetID(), err)
 			} else {
+				log.Debugf("Received response from [%s]: %+v", c.GetID(), clientResp)
 				allResults <- clientResp
 			}
 		}(client)

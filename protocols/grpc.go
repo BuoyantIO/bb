@@ -82,29 +82,28 @@ func NewGrpcServerIfConfigured(config *service.Config, serviceHandler *service.R
 func NewGrpcClientsIfConfigured(config *service.Config) ([]service.Client, error) {
 	clients := make([]service.Client, 0)
 
-	withAuthorities := false
-	if len(config.GRPCDownstreamAuthorities) > 0 {
-		if len(config.GRPCDownstreamAuthorities) != len(config.GRPCDownstreamServers) {
-			err := fmt.Errorf("Authorities count (%d) does not match gRPC downstream server count (%d)", len(config.GRPCDownstreamAuthorities), len(config.GRPCDownstreamServers))
-			log.Error(err)
-			return nil, err
-		}
-
-		withAuthorities = true
-	}
-
-	for i, serverURL := range config.GRPCDownstreamServers {
+	for _, serverURL := range config.GRPCDownstreamServers {
+		target := serverURL
 		authority := ""
-		if withAuthorities {
-			authority = config.GRPCDownstreamAuthorities[i]
+		clientID := serverURL
+		if config.GRPCProxy != "" {
+			target = config.GRPCProxy
+			authority = serverURL
+			clientID = config.GRPCProxy + " / " + serverURL
 		}
-		conn, err := grpc.Dial(serverURL, grpc.WithInsecure(), grpc.WithAuthority(authority))
+
+		conn, err := grpc.Dial(
+			target,
+			grpc.WithTimeout(config.DownstreamConnectionTimeout),
+			grpc.WithInsecure(),
+			grpc.WithAuthority(authority),
+		)
 		if err != nil {
 			return nil, err
 		}
 
 		client := pb.NewTheServiceClient(conn)
-		clients = append(clients, &theGrpcClient{id: serverURL, conn: conn, grpcClient: client})
+		clients = append(clients, &theGrpcClient{id: clientID, conn: conn, grpcClient: client})
 	}
 
 	return clients, nil

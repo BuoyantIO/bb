@@ -16,7 +16,7 @@ type Config struct {
 	GRPCServerPort              int
 	H1ServerPort                int
 	GRPCDownstreamServers       []string
-	GRPCDownstreamAuthorities   []string
+	GRPCProxy                   string
 	H1DownstreamServers         []string
 	PercentageFailedRequests    int
 	SleepInMillis               int

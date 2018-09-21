@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.3
+        image: buoyantio/bb:v0.0.5
         args: ["terminus", "--grpc-server-port", "9090", "--response-text", "BANANA"]
         ports:
         - containerPort: 9090
@@ -56,7 +56,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.3
+        image: buoyantio/bb:v0.0.5
         args: ["point-to-point-channel", "--grpc-downstream-server", "bb-readme-terminus-svc:9090", "--h1-server-port", "8080"]
         ports:
         - containerPort: 8080

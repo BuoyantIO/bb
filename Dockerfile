@@ -1,4 +1,4 @@
-FROM golang:1.10.0-stretch as golang
+FROM golang:1.11.0-stretch as golang
 WORKDIR /go/src/github.com/buoyantio/bb
 ADD .  /go/src/github.com/buoyantio/bb
 
