@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"time"
 
 	pb "github.com/buoyantio/bb/gen"
 	"github.com/buoyantio/bb/service"
@@ -37,18 +38,22 @@ type theGrpcClient struct {
 	id         string
 	conn       *grpc.ClientConn
 	grpcClient pb.TheServiceClient
+	timeout    time.Duration
 }
 
 func (c *theGrpcClient) GetID() string {
 	return c.id
 }
 
-func (c *theGrpcClient) Send(req *pb.TheRequest) (*pb.TheResponse, error) {
-	return c.grpcClient.TheFunction(context.Background(), req)
+func (c *theGrpcClient) Send(ctx context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
+	cctx, cancel := context.WithDeadline(ctx, time.Now().Add(c.timeout))
+	defer cancel()
+
+	return c.grpcClient.TheFunction(cctx, req)
 }
 
 func (c *theGrpcClient) Close() error {
-	log.Debugf("Closing client [%s]", c.id)
+	log.Infof("Closing client [%s]", c.id)
 	return c.conn.Close()
 }
 
@@ -92,18 +97,30 @@ func NewGrpcClientsIfConfigured(config *service.Config) ([]service.Client, error
 			clientID = config.GRPCProxy + " / " + serverURL
 		}
 
-		conn, err := grpc.Dial(
+		// we can throw away the CancelFunc because we use `grpc.WithBlock()` below
+		ctx, cancel := context.WithTimeout(context.Background(), config.DownstreamTimeout)
+		defer cancel()
+
+		conn, err := grpc.DialContext(
+			ctx,
 			target,
-			grpc.WithTimeout(config.DownstreamConnectionTimeout),
-			grpc.WithInsecure(),
 			grpc.WithAuthority(authority),
+			grpc.WithBlock(),
+			grpc.WithInsecure(),
 		)
 		if err != nil {
 			return nil, err
 		}
 
 		client := pb.NewTheServiceClient(conn)
-		clients = append(clients, &theGrpcClient{id: clientID, conn: conn, grpcClient: client})
+		clients = append(clients,
+			&theGrpcClient{
+				id:         clientID,
+				conn:       conn,
+				grpcClient: client,
+				timeout:    config.DownstreamTimeout,
+			},
+		)
 	}
 
 	return clients, nil

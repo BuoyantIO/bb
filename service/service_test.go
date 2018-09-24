@@ -169,7 +169,7 @@ func TestFireAndForgetClient(t *testing.T) {
 			RequestUID: "some request UID goes here",
 		}
 
-		response, err := fnfClient.Send(request)
+		response, err := fnfClient.Send(context.Background(), request)
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", expectedResponseToClose)
 		}
@@ -199,7 +199,7 @@ func TestFireAndForgetClient(t *testing.T) {
 			RequestUID: "some request UID goes here",
 		}
 
-		response, err := fnfClient.Send(request)
+		response, err := fnfClient.Send(context.Background(), request)
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", errors.New("error to return on close"))
 		}

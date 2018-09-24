@@ -16,9 +16,9 @@ type PointToPointChannelStrategy struct {
 	clients []service.Client
 }
 
-func (s *PointToPointChannelStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
+func (s *PointToPointChannelStrategy) Do(ctx context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
 	client := s.clients[0]
-	resp, err := client.Send(req)
+	resp, err := client.Send(ctx, req)
 	return resp, err
 }
 

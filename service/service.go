@@ -12,25 +12,25 @@ import (
 
 // Config holds the ,ain configuration for this service.
 type Config struct {
-	ID                          string
-	GRPCServerPort              int
-	H1ServerPort                int
-	GRPCDownstreamServers       []string
-	GRPCProxy                   string
-	H1DownstreamServers         []string
-	PercentageFailedRequests    int
-	SleepInMillis               int
-	TerminateAfter              int
-	FireAndForget               bool
-	DownstreamConnectionTimeout time.Duration
-	ExtraArguments              map[string]string
+	ID                       string
+	GRPCServerPort           int
+	H1ServerPort             int
+	GRPCDownstreamServers    []string
+	GRPCProxy                string
+	H1DownstreamServers      []string
+	PercentageFailedRequests int
+	SleepInMillis            int
+	TerminateAfter           int
+	FireAndForget            bool
+	DownstreamTimeout        time.Duration
+	ExtraArguments           map[string]string
 }
 
 // Client is an abstraction representing a client connection to each downstream service.
 type Client interface {
 	Close() error
 	GetID() string
-	Send(*pb.TheRequest) (*pb.TheResponse, error)
+	Send(context.Context, *pb.TheRequest) (*pb.TheResponse, error)
 }
 
 type fireAndForgetClient struct {
@@ -41,10 +41,10 @@ func (f *fireAndForgetClient) Close() error { return f.underlyingClient.Close() 
 
 func (f *fireAndForgetClient) GetID() string { return f.underlyingClient.GetID() }
 
-func (f *fireAndForgetClient) Send(req *pb.TheRequest) (*pb.TheResponse, error) {
+func (f *fireAndForgetClient) Send(ctx context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
 	go func(c Client, req *pb.TheRequest) {
 		log.Infof("Sending fire-and-forget request to [%s] for request UID [%s]", f.GetID(), req.RequestUID)
-		response, err := c.Send(req)
+		response, err := c.Send(ctx, req)
 		log.Infof("Response from fire-and-forget request to [%s] for request UID [%s] was: %s error %v", f.GetID(), req.RequestUID, response, err)
 	}(f.underlyingClient, req)
 

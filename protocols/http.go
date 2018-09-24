@@ -55,6 +55,8 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	log.Debugf("Received HTTP request [%s] [%+v] Context [%+v] Body [%+v]", protoReq.RequestUID, req, req.Context(), protoReq)
+
 	protoResponse, err := h.serviceHandler.Handle(req.Context(), &protoReq)
 	if err != nil {
 		dealWithErrorDuringHandling(w, fmt.Errorf("error handling http request: %v", err))
@@ -79,7 +81,7 @@ func (c *httpClient) Close() error { return nil }
 
 func (c *httpClient) GetID() string { return c.id }
 
-func (c *httpClient) Send(req *pb.TheRequest) (*pb.TheResponse, error) {
+func (c *httpClient) Send(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
 	json, err := marshallProtobufToJSON(req)
 	if err != nil {
 		return nil, err
@@ -181,7 +183,7 @@ func NewHTTPClientsIfConfigured(config *service.Config) ([]service.Client, error
 	clients := make([]service.Client, 0)
 
 	httpClientToUse := &http.Client{
-		Timeout: config.DownstreamConnectionTimeout,
+		Timeout: config.DownstreamTimeout,
 	}
 
 	for _, serverURL := range config.H1DownstreamServers {

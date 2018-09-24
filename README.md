@@ -98,19 +98,19 @@ A test run using the Docker CLI should return usage information and confirm that
       terminus               Receives the request and returns a pre-defined response
 
     Flags:
-          --downstream-timeout duration          timeout to use when making downstream connections. (default 1m0s)
-          --fire-and-forget                      do not wait for a response when contacting downstream services.
-          --grpc-downstream-server stringSlice   list of servers (hostname:port) to send messages to using gRPC, can be repeated
-          --grpc-proxy string                    optional proxy to route gRPC requests
-          --grpc-server-port int                 port to bind a gRPC server to (default -1)
-          --h1-downstream-server stringSlice     list of servers (protocol://hostname:port) to send messages to using HTTP 1.1, can be repeated
-          --h1-server-port int                   port to bind a HTTP 1.1 server to (default -1)
-      -h, --help                                 help for bb
-          --id string                            identifier for this container
-          --log-level string                     log level, must be one of: panic, fatal, error, warn, info, debug (default "info")
-          --percent-failure int                  percentage of requests that this service will automatically fail
-          --sleep-in-millis int                  amount of milliseconds to wait before actually start processing a request
-          --terminate-after int                  terminate the process after this many requests
+          --downstream-timeout duration      timeout to use when making downstream connections and requests. (default 1m0s)
+          --fire-and-forget                  do not wait for a response when contacting downstream services.
+          --grpc-downstream-server strings   list of servers (hostname:port) to send messages to using gRPC, can be repeated
+          --grpc-proxy string                optional proxy to route gRPC requests
+          --grpc-server-port int             port to bind a gRPC server to (default -1)
+          --h1-downstream-server strings     list of servers (protocol://hostname:port) to send messages to using HTTP 1.1, can be repeated
+          --h1-server-port int               port to bind a HTTP 1.1 server to (default -1)
+      -h, --help                             help for bb
+          --id string                        identifier for this container
+          --log-level string                 log level, must be one of: panic, fatal, error, warn, info, debug (default "info")
+          --percent-failure int              percentage of requests that this service will automatically fail
+          --sleep-in-millis int              amount of milliseconds to wait before actually start processing a request
+          --terminate-after int              terminate the process after this many requests
 
     Use "bb [command] --help" for more information about a command.
 
