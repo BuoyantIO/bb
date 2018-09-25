@@ -22,7 +22,7 @@ func (m *MockClient) Close() error {
 
 func (m *MockClient) GetID() string { return m.IDToReturn }
 
-func (m *MockClient) Send(req *pb.TheRequest) (*pb.TheResponse, error) {
+func (m *MockClient) Send(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
 	m.RequestReceived = req
 	if m.RequestInterceptor != nil {
 		m.RequestInterceptor(req)

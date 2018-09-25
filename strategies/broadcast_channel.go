@@ -21,7 +21,7 @@ type BroadcastChannelStrategy struct {
 }
 
 // Do executes the request
-func (s *BroadcastChannelStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
+func (s *BroadcastChannelStrategy) Do(ctx context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
 	numberOfRequestsToMake := len(s.clients)
 	log.Infof("Starting broadcast to [%d] downstream services", numberOfRequestsToMake)
 	var wg sync.WaitGroup
@@ -32,7 +32,7 @@ func (s *BroadcastChannelStrategy) Do(_ context.Context, req *pb.TheRequest) (*p
 		go func(c service.Client) {
 			log.Infof("Making request to [%s]", c.GetID())
 			defer wg.Done()
-			clientResp, err := c.Send(req)
+			clientResp, err := c.Send(ctx, req)
 			if err != nil {
 				log.Errorf("Error when broadcasting request [%v] to client [%s]: %v", req, c.GetID(), err)
 				allResults <- fmt.Errorf("downstream server [%s] returned error: %v", c.GetID(), err)

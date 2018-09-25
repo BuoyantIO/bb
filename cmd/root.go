@@ -53,6 +53,6 @@ func init() {
 	RootCmd.PersistentFlags().StringSliceVar(&config.GRPCDownstreamServers, "grpc-downstream-server", []string{}, "list of servers (hostname:port) to send messages to using gRPC, can be repeated")
 	RootCmd.PersistentFlags().StringVar(&config.GRPCProxy, "grpc-proxy", "", "optional proxy to route gRPC requests")
 	RootCmd.PersistentFlags().StringSliceVar(&config.H1DownstreamServers, "h1-downstream-server", []string{}, "list of servers (protocol://hostname:port) to send messages to using HTTP 1.1, can be repeated")
-	RootCmd.PersistentFlags().DurationVar(&config.DownstreamConnectionTimeout, "downstream-timeout", time.Minute*1, "timeout to use when making downstream connections.")
+	RootCmd.PersistentFlags().DurationVar(&config.DownstreamTimeout, "downstream-timeout", time.Minute*1, "timeout to use when making downstream connections and requests.")
 	RootCmd.PersistentFlags().StringVar(&logLevel, "log-level", log.InfoLevel.String(), "log level, must be one of: panic, fatal, error, warn, info, debug")
 }

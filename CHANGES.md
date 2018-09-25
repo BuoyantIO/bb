@@ -1,3 +1,7 @@
+## In the next release...
+
+* Better handling of contexts/deadlines/timeouts
+
 ## v0.0.5
 
 * Fix gRPC clients to honor `downstream-timeout`.

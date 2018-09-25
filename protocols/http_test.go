@@ -1,6 +1,7 @@
 package protocols
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -214,7 +215,7 @@ func TestHTTPClient(t *testing.T) {
 			clientForDownsteamServers: http.DefaultClient,
 		}
 
-		actualProtoResponse, err := client.Send(expectedProtoRequest)
+		actualProtoResponse, err := client.Send(context.Background(), expectedProtoRequest)
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
@@ -250,7 +251,7 @@ func TestHTTPClient(t *testing.T) {
 			clientForDownsteamServers: http.DefaultClient,
 		}
 
-		_, err := client.Send(expectedProtoRequest)
+		_, err := client.Send(context.Background(), expectedProtoRequest)
 		if err == nil {
 			t.Fatalf("Expecting error, got nothing")
 		}
@@ -279,7 +280,7 @@ func TestHTTPClient(t *testing.T) {
 			clientForDownsteamServers: http.DefaultClient,
 		}
 
-		_, err := client.Send(expectedProtoRequest)
+		_, err := client.Send(context.Background(), expectedProtoRequest)
 		if err == nil {
 			t.Fatalf("Expecting error, got nothing")
 		}
