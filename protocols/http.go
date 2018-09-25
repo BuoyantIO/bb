@@ -81,13 +81,18 @@ func (c *httpClient) Close() error { return nil }
 
 func (c *httpClient) GetID() string { return c.id }
 
-func (c *httpClient) Send(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
+func (c *httpClient) Send(ctx context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
 	json, err := marshallProtobufToJSON(req)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := c.clientForDownsteamServers.Post(c.serverURL, "application/json", strings.NewReader(json))
+	httpReq, err := http.NewRequest("POST", c.serverURL, strings.NewReader(json))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	resp, err := c.clientForDownsteamServers.Do(httpReq.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}

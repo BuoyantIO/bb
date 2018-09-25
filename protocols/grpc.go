@@ -97,7 +97,6 @@ func NewGrpcClientsIfConfigured(config *service.Config) ([]service.Client, error
 			clientID = config.GRPCProxy + " / " + serverURL
 		}
 
-		// we can throw away the CancelFunc because we use `grpc.WithBlock()` below
 		ctx, cancel := context.WithTimeout(context.Background(), config.DownstreamTimeout)
 		defer cancel()
 

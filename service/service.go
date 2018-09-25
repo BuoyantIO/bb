@@ -42,11 +42,11 @@ func (f *fireAndForgetClient) Close() error { return f.underlyingClient.Close() 
 func (f *fireAndForgetClient) GetID() string { return f.underlyingClient.GetID() }
 
 func (f *fireAndForgetClient) Send(ctx context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
-	go func(c Client, req *pb.TheRequest) {
+	go func(c Client, ctx context.Context, req *pb.TheRequest) {
 		log.Infof("Sending fire-and-forget request to [%s] for request UID [%s]", f.GetID(), req.RequestUID)
 		response, err := c.Send(ctx, req)
 		log.Infof("Response from fire-and-forget request to [%s] for request UID [%s] was: %s error %v", f.GetID(), req.RequestUID, response, err)
-	}(f.underlyingClient, req)
+	}(f.underlyingClient, ctx, req)
 
 	stubResponse := &pb.TheResponse{
 		Payload: fmt.Sprintf("Stub response for fire-and-forget request to [%s] for request UID [%s]", f.GetID(), req.RequestUID),
