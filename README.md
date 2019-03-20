@@ -115,7 +115,7 @@ A test run using the Docker CLI should return usage information and confirm that
     Use "bb [command] --help" for more information about a command.
 
 To build the exact same scenario we had above, but for Kubernetes, you can deploy the should have
-a YAML configuration like the one in our [examples directory](). You can deploy it to your Kubernetes
+a YAML configuration like the one in our [examples directory](examples). You can deploy it to your Kubernetes
 cluster by running:
 
     $ kubectl apply -f examples/bb-readme/application.yaml
