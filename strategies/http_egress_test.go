@@ -56,10 +56,11 @@ func TestHttpEgressStrategy(t *testing.T) {
 			var jsonPayload map[string]interface{}
 			json.Unmarshal([]byte(response.Payload), &jsonPayload)
 
-			expectedURL := urlToInvoke
+			// hard-code HTTPS due to https://github.com/postmanlabs/httpbin/issues/536
+			expectedURL := fmt.Sprintf("https://%s/anything", expectedHost)
 			actualURL := jsonPayload["url"]
 			if actualURL != expectedURL {
-				t.Fatalf("Expected HTTP method to be [%s], but got [%s]", expectedURL, actualURL)
+				t.Fatalf("Expected HTTP URL to be [%s], but got [%s]", expectedURL, actualURL)
 			}
 
 			expectedMethod := "GET"

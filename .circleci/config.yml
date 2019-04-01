@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-    - image: circleci/golang:1.10
+    - image: circleci/golang:1.11.6-stretch
     working_directory: /go/src/github.com/buoyantio/bb
     steps:
     - checkout
