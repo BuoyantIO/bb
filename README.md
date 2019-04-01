@@ -32,7 +32,7 @@ setup. Open a terminal and type in the following:
 
     $  target/bb terminus --grpc-server-port 9090 --response-text BANANA
 
-Them, on a second terminal window, type this:
+Then, on a second terminal window, type this:
 
     $ target/bb point-to-point-channel --grpc-downstream-server localhost:9090 --h1-server-port 8080
 
