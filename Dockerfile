@@ -16,8 +16,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     iptables \
     jq \
     nghttp2 \
-    ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # We still rely on old iptables-legacy syntax.
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy \
