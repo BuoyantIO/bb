@@ -124,3 +124,10 @@ You can then use `curl`to query the service:
 
     $ curl `minikube -n bb-readme service bb-readme-gateway-svc  --url`
     {"requestUid":"in:http-sid:point-to-point-channel-grpc:-1-h1:8080-66349706","payload":"BANANA"}
+
+## Build Multi-Arch Images with Buildx
+
+    docker buildx build . \
+      --platform linux/amd64,linux/arm64,linux/arm/v7 \
+      --push \
+      --tag buoyantio/bb:<version>
