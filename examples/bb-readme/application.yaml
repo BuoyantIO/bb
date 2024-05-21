@@ -4,7 +4,7 @@ kind: Namespace
 metadata:
   name: bb-readme
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bb-readme-terminus
@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.5
+        image: buoyantio/bb:latest
         args: ["terminus", "--grpc-server-port", "9090", "--response-text", "BANANA"]
         ports:
         - containerPort: 9090
@@ -39,7 +39,7 @@ spec:
     port: 9090
     targetPort: 9090
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bb-readme-gateway
@@ -56,7 +56,7 @@ spec:
     spec:
       containers:
       - name: http-to-grpc
-        image: buoyantio/bb:v0.0.5
+        image: buoyantio/bb:latest
         args: ["point-to-point-channel", "--grpc-downstream-server", "bb-readme-terminus-svc:9090", "--h1-server-port", "8080"]
         ports:
         - containerPort: 8080
@@ -69,7 +69,6 @@ metadata:
 spec:
   selector:
     app: bb-readme-gateway
-  type: LoadBalancer
   ports:
   - name: http
     port: 8080

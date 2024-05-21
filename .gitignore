@@ -1,5 +1,2 @@
 vendor
 target
-.idea
-.protoc
-.dep*

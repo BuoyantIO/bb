@@ -3,6 +3,7 @@ package strategies
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -40,8 +41,13 @@ type HTTPEgressStrategy struct {
 
 // Do executes the request
 func (s *HTTPEgressStrategy) Do(_ context.Context, req *pb.TheRequest) (*pb.TheResponse, error) {
+	var body io.Reader
+	if s.methodToUse == http.MethodPost || s.methodToUse == http.MethodPut || s.methodToUse == http.MethodPatch {
+		// only POST, PUT and PATCH methods can have a body
+		body = strings.NewReader(req.RequestUID)
+	}
 
-	httpRequest, err := http.NewRequest(s.methodToUse, s.urlToInvoke, strings.NewReader(req.RequestUID))
+	httpRequest, err := http.NewRequest(s.methodToUse, s.urlToInvoke, body)
 	if err != nil {
 		return nil, err
 	}

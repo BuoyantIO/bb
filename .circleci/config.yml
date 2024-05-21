@@ -2,9 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-    - image: circleci/golang:1.11.6-stretch
-    working_directory: /go/src/github.com/buoyantio/bb
+    - image: cimg/go:1.22.3
     steps:
     - checkout
-    - run: bin/dep ensure -vendor-only
     - run: bin/precheck.sh
