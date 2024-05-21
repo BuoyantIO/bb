@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -eu
 
@@ -9,16 +9,19 @@ else
 fi
 arch=$(uname -m)
 
-protocbin=.protoc
-protocversion=3.4.0
-protocurl="https://github.com/google/protobuf/releases/download/v${protocversion}/protoc-${protocversion}-${os}-${arch}.zip"
+protocversion=3.20.1
+
+targetbin=target/bin
+protocbin=$targetbin/protoc-${protocversion}
+protocurl="https://github.com/protocolbuffers/protobuf/releases/download/v${protocversion}/protoc-${protocversion}-${os}-${arch}.zip"
 
 if [ ! -f "$protocbin" ]; then
   tmp=$(mktemp -d -t protoc.XXX)
+  mkdir -p $targetbin
   (
-    cd $tmp
-    curl -L --silent --fail -o "$protocbin.zip" "$protocurl"
-    jar xf "$protocbin.zip"
+    cd "$tmp"
+    curl -L --silent --fail -o "./protoc.zip" "$protocurl"
+    unzip -q "./protoc.zip" bin/protoc
     chmod +x bin/protoc
   )
   mv "$tmp/bin/protoc" "$protocbin"

@@ -1,13 +1,22 @@
-FROM golang:1.11.6-stretch as golang
-WORKDIR /go/src/github.com/buoyantio/bb
-ADD .  /go/src/github.com/buoyantio/bb
+# cache go modules in a separate image
+FROM --platform=$BUILDPLATFORM golang:1.22.3-alpine as go-deps
+WORKDIR /bb-build
+COPY go.mod go.sum main.go ./
+COPY cmd cmd
+COPY gen gen
+COPY protocols protocols
+COPY service service
+COPY strategies strategies
+RUN go mod vendor
 
-RUN mkdir -p /out
-RUN ./bin/dep ensure
-RUN go build -o /out/bb .
+# build the bb binary
+FROM --platform=$BUILDPLATFORM go-deps as golang
+WORKDIR /bb-build
+RUN CGO_ENABLED=0 go build -o /out/bb -mod=vendor .
 
-FROM gcr.io/linkerd-io/base:2019-02-19.01
-RUN apt-get update
-RUN apt-get install -y ca-certificates
-COPY --from=golang /out /out
+# package a runtime image
+FROM scratch
+LABEL org.opencontainers.image.source=https://github.com/buoyantio/bb
+COPY --from=golang /out/bb /out/bb
+COPY --from=golang /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 ENTRYPOINT ["/out/bb"]

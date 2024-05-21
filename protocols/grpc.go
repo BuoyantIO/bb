@@ -13,6 +13,7 @@ import (
 )
 
 type theGrpcServer struct {
+	pb.UnimplementedTheServiceServer
 	grpcServer     *grpc.Server
 	port           int
 	serviceHandler *service.RequestHandler
